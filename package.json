@@ -1,0 +1,18 @@
+{
+  "name": "sponsor-survey",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Sponsor Experience Survey: static site plus automated tests",
+  "scripts": {
+    "serve": "python3 -m http.server 4173 --bind 127.0.0.1",
+    "test": "node --test tests/appsscript.test.js && playwright test",
+    "test:ui": "playwright test",
+    "test:script": "node --test tests/appsscript.test.js",
+    "lighthouse": "node tests/lighthouse-check.js"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.10.2",
+    "@playwright/test": "1.63.0",
+    "lighthouse": "12.8.2"
+  }
+}

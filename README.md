@@ -23,6 +23,7 @@ Live site: https://slyguy7.github.io/sponsor-survey/
 | `assets/njit-logo.png`, `favicon.svg`, `og.png` | Logo, tab icon and link-preview image |
 | `apps-script/Code.gs` | The response collector. Not served by GitHub Pages; paste it into Apps Script |
 | `404.html` | Page shown for mistyped links |
+| `tests/`, `package.json`, `playwright.config.js`, `.github/workflows/test.yml` | Automated tests and the workflow that runs them |
 
 ## Change a question
 
@@ -39,7 +40,18 @@ Edit `assets/survey.json`. Question types: `single`, `multi`, `scale`, `grid`, `
 
 The script ignores unknown fields, caps text length, prefixes values that start with `=`, `+`, `-` or `@` so a sheet never runs them as formulas, rejects honeypot and impossibly fast submissions, de-duplicates retries by `submissionId`, and serializes writes with a lock.
 
-## Test locally
+## Automated tests
+
+Every push runs the checks in `.github/workflows/test.yml` (Actions tab on GitHub; a green tick means they passed). GitHub Pages publishes your branch whether or not they pass, so look at the tick before you share a new version.
+
+| Command | What it checks |
+| --- | --- |
+| `npm test` | 10 Apps Script unit tests, then 40 browser tests: the full survey, skip logic, validation, keyboard use, Back button, resume, all four failure modes, accessibility (axe on every screen type), layout at 13 screen sizes |
+| `npm run lighthouse` | Lighthouse performance 95+, accessibility and best practices 100, mobile and desktop |
+
+First time: `npm install` then `npx playwright install chromium`. The real response sheet is never contacted; the tests intercept the network request.
+
+## Test by hand
 
 ```
 python3 -m http.server 8000

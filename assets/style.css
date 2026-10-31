@@ -240,3 +240,15 @@ fieldset{border:0;min-width:0}
   .nav .hint{display:none}
   .opt{padding:8px 12px}
 }
+
+/* very small phones: keep the headline, chips and Start button on the first screen */
+@media (max-width:480px){
+  .hero-in{gap:12px;padding-top:14px}
+  .hero-main{gap:12px}
+  .hero h1{font-size:clamp(2.125rem,11vw,3rem)}
+  .hero .lede{font-size:1rem}
+  .chip{padding:6px 12px;font-size:.875rem}
+  .chip b{font-size:1.125rem}
+  .btn{padding:12px 20px}
+  .logo-pill img{height:34px}
+}
