@@ -188,8 +188,8 @@ fieldset{border:0;min-width:0}
 .opt:has(input:focus-visible),.sc:has(input:focus-visible),.pill:has(input:focus-visible){outline:3px solid var(--blue);outline-offset:3px}
 .scale-lbl span:last-child{text-align:right}
 .row{position:relative}
-.row legend{font-weight:600;margin-bottom:9px;padding:0 28px 0 0;float:left;width:100%}
-.row legend+*{clear:both}
+.row legend{float:left;width:100%;font-weight:600;margin-bottom:9px;padding:0 28px 0 0}
+.row .pills{clear:both;width:100%}
 .row>i{position:absolute;right:14px;top:12px;font-style:normal;color:var(--ok);font-weight:800;opacity:0;transition:opacity .2s}
 .row.done>i{opacity:1}
 .opts{border:0;padding:0}
