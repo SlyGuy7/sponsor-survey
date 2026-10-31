@@ -126,7 +126,8 @@ function render() {
   document.title = (s.kind === 'q' && s.q.n ? 'Question ' + s.q.n + ' of ' + total() : part.name) + ' – Sponsor Experience Survey';
   // focus: text fields on devices with a keyboard, otherwise the heading so assistive technology reads it
   const field = s.kind === 'q' && (s.q.type === 'text' || s.q.type === 'contact') && !coarse() ? stage.querySelector('input,textarea') : null;
-  setTimeout(() => (field || $('#qt')).focus({ preventScroll: true }), 60);
+  // ...unless the person has already moved focus into the new screen, e.g. tabbed to an answer, in which case leave it there
+  setTimeout(() => { if (!stage.contains(document.activeElement)) (field || $('#qt')).focus({ preventScroll: true }); }, 60);
 }
 
 function drawCtl(q) {
