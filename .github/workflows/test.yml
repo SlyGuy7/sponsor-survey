@@ -9,21 +9,35 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-      - run: npm ci
-      - run: npx playwright install --with-deps chromium
-      - name: Unit tests (Apps Script) and browser tests
-        run: npm test
+      - name: Install packages
+        run: npm ci
+      - name: Install the test browser
+        run: npx playwright install --with-deps chromium
+
+      # Each check below runs even if an earlier one failed, so one run shows everything that is wrong.
+      - name: Apps Script unit tests
+        if: ${{ !cancelled() }}
+        run: npm run test:script
+      - name: Browser tests (survey, keyboard, accessibility, layout)
+        if: ${{ !cancelled() }}
+        run: npm run test:ui
       - name: Lighthouse scores
-        run: npm run lighthouse
+        if: ${{ !cancelled() }}
+        run: |
+          export CHROME_PATH="$(node -e "console.log(require('@playwright/test').chromium.executablePath())")"
+          npm run lighthouse
+
       - uses: actions/upload-artifact@v4
-        if: failure()
+        if: ${{ failure() }}
         with:
           name: playwright-report
-          path: playwright-report/
+          path: |
+            playwright-report/
+            test-results/
