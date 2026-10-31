@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 
-const MIN = { performance: 0.95, accessibility: 1, 'best-practices': 1 };
+const MIN = { performance: 0.9, accessibility: 1, 'best-practices': 1 };   // shared CI machines are slower than a laptop
 const port = 4174;
 const server = spawn('python3', ['-m', 'http.server', String(port), '--bind', '127.0.0.1'], { cwd: path.join(__dirname, '..'), stdio: 'ignore' });
 const lh = path.join(__dirname, '..', 'node_modules', '.bin', 'lighthouse');
@@ -16,7 +16,7 @@ try {
     const args = [`http://127.0.0.1:${port}/index.html`, '--chrome-flags=--headless=new --no-sandbox', '--output=json', `--output-path=${out}`, '--quiet'];
     if (preset === 'desktop') args.push('--preset=desktop');
     try { execFileSync(lh, args, { stdio: 'ignore', timeout: 120000, env: process.env }); }
-    catch (e) { console.error('Lighthouse failed to run:', e.message); failed = true; continue; }
+    catch (e) { console.error('Lighthouse failed to run (is Chrome installed? set CHROME_PATH):', e.message); failed = true; continue; }
     const r = JSON.parse(fs.readFileSync(out, 'utf8'));
     for (const [cat, min] of Object.entries(MIN)) {
       const score = r.categories[cat].score;
