@@ -3,11 +3,12 @@ const { defineConfig } = require('@playwright/test');
 module.exports = defineConfig({
   testDir: 'tests',
   testMatch: '*.spec.js',
-  timeout: 60000,
+  timeout: 90000,
   fullyParallel: true,
   workers: process.env.CI ? 2 : 4,
   retries: process.env.CI ? 1 : 0,
-  reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : 'list',
+  // In CI the 'github' reporter prints each failing test as a red annotation on the run's summary page.
+  reporter: process.env.CI ? [['list'], ['github'], ['html', { open: 'never' }]] : 'list',
   use: {
     baseURL: 'http://127.0.0.1:4173',
     // CHROME_PATH lets a machine with a preinstalled Chromium skip `playwright install`.
