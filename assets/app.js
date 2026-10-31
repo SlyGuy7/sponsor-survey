@@ -2,7 +2,7 @@
 'use strict';
 
 /* ---------- configuration ---------- */
-const ENDPOINT = 'https://script.google.com/macros/s/AKfycbwBxJbu22vcLFs9wwNe2_FlNMnvDnc9Lntr7zteddkXoKNfT--q7UE7JIuWLiiOO3epng/exec';
+const ENDPOINT = 'https://script.google.com/macros/s/AKfycbxwJBFhmA1rF7pGtUPVpPwqblEnttvOuaUfCXjdgJDlWTFpAHdhyiPJbE6tPYRPMS2_2A/exec';
 const STORE = 'njit-sponsor-survey-v2';
 const PREF = 'njit-sponsor-survey-prefs';
 const TTL = 24 * 60 * 60 * 1000;          // saved progress expires after 24 hours
