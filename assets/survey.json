@@ -1,0 +1,636 @@
+{
+ "parts": [
+  {
+   "id": "A",
+   "name": "About you and your organization",
+   "note": "These questions help us understand the range of sponsors we work with.",
+   "label": "Part A"
+  },
+  {
+   "id": "B",
+   "name": "Before the project started",
+   "note": "These questions are about what you knew and what was ready when your student team began.",
+   "label": "Part B"
+  },
+  {
+   "id": "C",
+   "name": "Kickoff and communication",
+   "note": "These questions are about the first weeks of working with your team.",
+   "label": "Part C"
+  },
+  {
+   "id": "D",
+   "name": "Overall experience",
+   "note": "Three questions about the project so far.",
+   "label": "Part D"
+  },
+  {
+   "id": "E",
+   "name": "A readiness kit for new sponsors",
+   "note": "Imagine every new sponsor received a short readiness kit after the professor approved them and before students began. Please think about your own experience when you answer.",
+   "label": "Part E"
+  },
+  {
+   "id": "X",
+   "name": "Before you go",
+   "note": "Not counted in the 20 questions.",
+   "label": "Bonus"
+  }
+ ],
+ "questions": [
+  {
+   "n": 1,
+   "part": "A",
+   "text": "Which best describes your organization?",
+   "hint": "",
+   "type": "single",
+   "options": [
+    {
+     "label": "Large company (1,000 or more employees)",
+     "other": false
+    },
+    {
+     "label": "Mid-size company (100 to 999)",
+     "other": false
+    },
+    {
+     "label": "Small company (10 to 99)",
+     "other": false
+    },
+    {
+     "label": "Startup or very small team (under 10)",
+     "other": false
+    },
+    {
+     "label": "University or research group",
+     "other": false
+    },
+    {
+     "label": "Nonprofit or government",
+     "other": false
+    },
+    {
+     "label": "Other",
+     "other": true
+    },
+    {
+     "label": "Prefer not to say",
+     "other": false
+    }
+   ]
+  },
+  {
+   "n": 2,
+   "part": "A",
+   "text": "Which industry is your organization in?",
+   "hint": "",
+   "type": "single",
+   "options": [
+    {
+     "label": "Software and technology",
+     "other": false
+    },
+    {
+     "label": "Finance or insurance",
+     "other": false
+    },
+    {
+     "label": "Healthcare or life sciences",
+     "other": false
+    },
+    {
+     "label": "Education or research",
+     "other": false
+    },
+    {
+     "label": "Government or nonprofit",
+     "other": false
+    },
+    {
+     "label": "Manufacturing, logistics, or retail",
+     "other": false
+    },
+    {
+     "label": "Consulting or professional services",
+     "other": false
+    },
+    {
+     "label": "Other",
+     "other": true
+    },
+    {
+     "label": "Prefer not to say",
+     "other": false
+    }
+   ]
+  },
+  {
+   "n": 3,
+   "part": "A",
+   "text": "Which best describes your role on this project?",
+   "hint": "",
+   "type": "single",
+   "options": [
+    {
+     "label": "Executive or final decision maker",
+     "other": false
+    },
+    {
+     "label": "Manager or program lead",
+     "other": false
+    },
+    {
+     "label": "Technical lead or engineer",
+     "other": false
+    },
+    {
+     "label": "Partnerships or university-relations coordinator",
+     "other": false
+    },
+    {
+     "label": "Other",
+     "other": true
+    },
+    {
+     "label": "Prefer not to say",
+     "other": false
+    }
+   ]
+  },
+  {
+   "n": 4,
+   "part": "A",
+   "text": "Before this semester, how many student capstone or academic projects had you sponsored or supported?",
+   "hint": "",
+   "type": "single",
+   "options": [
+    {
+     "label": "None, this is my first",
+     "other": false
+    },
+    {
+     "label": "1",
+     "other": false
+    },
+    {
+     "label": "2 to 3",
+     "other": false
+    },
+    {
+     "label": "4 or more",
+     "other": false
+    },
+    {
+     "label": "Prefer not to say",
+     "other": false
+    }
+   ]
+  },
+  {
+   "n": 5,
+   "part": "A",
+   "text": "How many student teams are you working with this semester?",
+   "hint": "",
+   "type": "single",
+   "options": [
+    {
+     "label": "1",
+     "other": false
+    },
+    {
+     "label": "2 to 3",
+     "other": false
+    },
+    {
+     "label": "4 to 8",
+     "other": false
+    },
+    {
+     "label": "9 or more",
+     "other": false
+    },
+    {
+     "label": "Prefer not to say",
+     "other": false
+    }
+   ]
+  },
+  {
+   "n": 6,
+   "part": "A",
+   "text": "How would you describe your own technical background for this project?",
+   "hint": "",
+   "type": "single",
+   "options": [
+    {
+     "label": "Hands-on technical (I could do the work myself)",
+     "other": false
+    },
+    {
+     "label": "Technical manager (I understand the work but do not do it)",
+     "other": false
+    },
+    {
+     "label": "Business or non-technical (I set the goals and others handle the technology)",
+     "other": false
+    },
+    {
+     "label": "A mix of these",
+     "other": false
+    },
+    {
+     "label": "Prefer not to say",
+     "other": false
+    }
+   ]
+  },
+  {
+   "n": 7,
+   "part": "B",
+   "text": "Before the project began, how clear was it to you what the program expected from you as a sponsor?",
+   "hint": "",
+   "type": "scale",
+   "low": "Not at all clear",
+   "high": "Completely clear",
+   "extra": [
+    "I do not recall"
+   ]
+  },
+  {
+   "n": 8,
+   "part": "B",
+   "text": "Where did you learn what was expected of you?",
+   "hint": "Select all that apply.",
+   "type": "multi",
+   "options": [
+    {
+     "label": "Email from the program or professor",
+     "other": false
+    },
+    {
+     "label": "A meeting or call",
+     "other": false
+    },
+    {
+     "label": "A document or web page",
+     "other": false
+    },
+    {
+     "label": "Discord",
+     "other": false
+    },
+    {
+     "label": "A colleague or earlier sponsor",
+     "other": false
+    },
+    {
+     "label": "I figured it out as the project went",
+     "other": false,
+     "exclusive": true
+    },
+    {
+     "label": "I never received this information",
+     "other": false,
+     "exclusive": true
+    },
+    {
+     "label": "Other",
+     "other": true
+    }
+   ]
+  },
+  {
+   "n": 9,
+   "part": "B",
+   "text": "When your student team began, how ready was each of the following?",
+   "hint": "Choose one answer for each row.",
+   "type": "grid",
+   "cols": [
+    "Ready before the team started",
+    "Ready within the first week",
+    "Ready in weeks 2 to 4",
+    "Still not ready",
+    "Not needed for our project"
+   ],
+   "rows": [
+    "Clear project goals and scope",
+    "Written requirements",
+    "Data or documents the team needed",
+    "Accounts, tools, or system access",
+    "A named technical contact for the team",
+    "A person who could approve decisions",
+    "Any required agreements (for example NDA or IP terms)"
+   ]
+  },
+  {
+   "n": 10,
+   "part": "B",
+   "text": "Which one item caused the team the longest wait?",
+   "hint": "",
+   "type": "single",
+   "options": [
+    {
+     "label": "Nothing was delayed",
+     "other": false,
+     "skipTo": 12
+    },
+    {
+     "label": "Scope or goals",
+     "other": false
+    },
+    {
+     "label": "Requirements",
+     "other": false
+    },
+    {
+     "label": "Data or documents",
+     "other": false
+    },
+    {
+     "label": "Access to accounts, tools, or systems",
+     "other": false
+    },
+    {
+     "label": "A technical contact",
+     "other": false
+    },
+    {
+     "label": "A decision or approval",
+     "other": false
+    },
+    {
+     "label": "An agreement (NDA or IP)",
+     "other": false
+    },
+    {
+     "label": "Something else",
+     "other": true
+    }
+   ]
+  },
+  {
+   "n": 11,
+   "part": "C",
+   "text": "About how long did the team wait for that item?",
+   "hint": "",
+   "type": "single",
+   "options": [
+    {
+     "label": "Less than 3 days",
+     "other": false
+    },
+    {
+     "label": "3 to 7 days",
+     "other": false
+    },
+    {
+     "label": "1 to 2 weeks",
+     "other": false
+    },
+    {
+     "label": "More than 2 weeks",
+     "other": false
+    },
+    {
+     "label": "Still waiting",
+     "other": false
+    },
+    {
+     "label": "I am not sure",
+     "other": false
+    }
+   ]
+  },
+  {
+   "n": 12,
+   "part": "C",
+   "text": "How quickly did the team have a named day-to-day contact on your side who could answer technical questions?",
+   "hint": "",
+   "type": "single",
+   "options": [
+    {
+     "label": "From the first meeting",
+     "other": false
+    },
+    {
+     "label": "Within the first week",
+     "other": false
+    },
+    {
+     "label": "Within the first month",
+     "other": false
+    },
+    {
+     "label": "Not yet",
+     "other": false
+    },
+    {
+     "label": "Our project did not need one",
+     "other": false
+    }
+   ]
+  },
+  {
+   "n": 13,
+   "part": "C",
+   "text": "In the first month, which best describes how often you and the team communicated?",
+   "hint": "",
+   "type": "single",
+   "options": [
+    {
+     "label": "Several times a week",
+     "other": false
+    },
+    {
+     "label": "About weekly",
+     "other": false
+    },
+    {
+     "label": "About every two weeks",
+     "other": false
+    },
+    {
+     "label": "Only at sprint reviews",
+     "other": false
+    },
+    {
+     "label": "Rarely",
+     "other": false
+    }
+   ]
+  },
+  {
+   "n": 14,
+   "part": "C",
+   "text": "How clear were you on how quickly to respond to the team and how to give feedback?",
+   "hint": "",
+   "type": "scale",
+   "low": "Not at all clear",
+   "high": "Completely clear",
+   "extra": []
+  },
+  {
+   "n": 15,
+   "part": "D",
+   "text": "Compared with what you expected, the time this project asked of you was:",
+   "hint": "",
+   "type": "single",
+   "options": [
+    {
+     "label": "Much less than expected",
+     "other": false
+    },
+    {
+     "label": "Somewhat less",
+     "other": false
+    },
+    {
+     "label": "About what I expected",
+     "other": false
+    },
+    {
+     "label": "Somewhat more",
+     "other": false
+    },
+    {
+     "label": "Much more than expected",
+     "other": false
+    }
+   ]
+  },
+  {
+   "n": 16,
+   "part": "D",
+   "text": "Overall, how satisfied are you with how the project got started?",
+   "hint": "",
+   "type": "scale",
+   "low": "Very dissatisfied",
+   "high": "Very satisfied",
+   "extra": []
+  },
+  {
+   "n": 17,
+   "part": "D",
+   "text": "What was the most helpful thing anyone did to help you get ready or get started?",
+   "hint": "",
+   "type": "text",
+   "optional": true
+  },
+  {
+   "n": 18,
+   "part": "E",
+   "text": "How useful would each of these have been to you?",
+   "hint": "Choose one answer for each row. 1 = Not useful, 5 = Very useful.",
+   "type": "grid",
+   "cols": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "Not sure"
+   ],
+   "rows": [
+    "A pre-kickoff checklist of what to prepare (scope, data, access, contact)",
+    "An intake form you fill in once",
+    "A one-page agreement on check-in rhythm, response times, and feedback",
+    "A welcome post with the kit in your team's Discord channel",
+    "A sample timeline of the first four weeks",
+    "A short FAQ for first-time sponsors"
+   ]
+  },
+  {
+   "n": 19,
+   "part": "E",
+   "text": "How would you prefer to receive it?",
+   "hint": "",
+   "type": "single",
+   "options": [
+    {
+     "label": "A Discord post when I am approved",
+     "other": false
+    },
+    {
+     "label": "An email at least a week before kickoff",
+     "other": false
+    },
+    {
+     "label": "A 15-minute live walkthrough",
+     "other": false
+    },
+    {
+     "label": "A form link at kickoff",
+     "other": false
+    },
+    {
+     "label": "No preference",
+     "other": false
+    }
+   ]
+  },
+  {
+   "n": 20,
+   "part": "E",
+   "text": "What do you wish someone had told you before the project began?",
+   "hint": "",
+   "type": "text",
+   "optional": true
+  },
+  {
+   "n": null,
+   "bonus": 1,
+   "part": "X",
+   "title": "Contact details",
+   "text": "Name, organization, and email, only if you are happy for us to follow up.",
+   "hint": "",
+   "type": "contact",
+   "optional": true
+  },
+  {
+   "n": null,
+   "bonus": 2,
+   "part": "X",
+   "title": "Permission to quote",
+   "text": "May we quote your answers to Questions 17 and 20 without naming you?",
+   "hint": "",
+   "type": "single",
+   "options": [
+    {
+     "label": "Yes",
+     "other": false
+    },
+    {
+     "label": "No",
+     "other": false
+    }
+   ],
+   "compact": true,
+   "optional": true
+  },
+  {
+   "n": null,
+   "bonus": 3,
+   "part": "X",
+   "title": "Results",
+   "text": "Would you like a summary of the results?",
+   "hint": "",
+   "type": "single",
+   "options": [
+    {
+     "label": "Yes",
+     "other": false
+    },
+    {
+     "label": "No",
+     "other": false
+    }
+   ],
+   "compact": true,
+   "optional": true
+  }
+ ],
+ "config": {
+  "contactEmail": "",
+  "estimate": "about 5 minutes"
+ }
+}
