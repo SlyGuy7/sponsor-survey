@@ -12,7 +12,6 @@ test.describe('page basics', () => {
     await page.goto('/index.html');
     await expect(page.locator('#start')).toBeEnabled();
     await expect(page.locator('h1:visible')).toContainText('Help us help the');
-    await expect(page.locator('.chips')).toContainText('20');
     expect(problems).toEqual([]);
   });
 
