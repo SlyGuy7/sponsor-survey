@@ -2,12 +2,17 @@ const { test, expect } = require('@playwright/test');
 const AxeBuilder = require('@axe-core/playwright').default;
 const { mockEndpoint, KIND, isDone, answerCurrent, disableQuick } = require('./helpers');
 
-test.use({ bypassCSP: true });   // lets axe inject itself; the CSP itself is checked in survey.spec.js
+test.use({ bypassCSP: true, reducedMotion: 'reduce' });   // bypassCSP lets axe inject itself (the CSP is checked in survey.spec.js); reduced motion keeps entrance animations from being scanned half-faded
 
 const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice'];
 async function scan(page, label) {
+  // let any entrance animation finish, so text is scanned at full opacity
+  await page.waitForFunction(() => document.getAnimations().every(a => a.playState !== 'running'), null, { timeout: 10000 });
+  await page.waitForTimeout(150);
   const { violations } = await new AxeBuilder({ page }).withTags(TAGS).analyze();
-  expect(violations.map(v => `${label}: ${v.id} ${v.nodes[0].target}`), label).toEqual([]);
+  // describe every violation fully, so a failure on another machine explains itself
+  const detail = violations.map(v => `${label}: ${v.id} (${v.impact}) ` + v.nodes.slice(0, 3).map(n => `${n.target} :: ${((n.any[0] || n.all[0] || n.none[0] || {}).message || '').slice(0, 160)}`).join(' | '));
+  expect(detail.join('\n'), label).toBe('');
 }
 
 test('no axe violations on any screen type, including both end states', async ({ page }) => {
