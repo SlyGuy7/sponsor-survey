@@ -581,7 +581,7 @@
    "bonus": 1,
    "part": "X",
    "title": "Contact details",
-   "text": "Name, organization, and email, only if you are happy for us to follow up.",
+   "text": "Name, organization, and email, only if you are happy for us to follow up or to send you the results summary.",
    "hint": "",
    "type": "contact",
    "optional": true
@@ -612,7 +612,7 @@
    "bonus": 3,
    "part": "X",
    "title": "Results",
-   "text": "Would you like a summary of the results?",
+   "text": "When the survey is finished, would you like us to email you a summary of the overall results?",
    "hint": "",
    "type": "single",
    "options": [
