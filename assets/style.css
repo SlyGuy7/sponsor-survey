@@ -365,3 +365,35 @@ fieldset{border:0;min-width:0}
 }
 
 @media (max-width:860px){.pane{flex:1 1 auto}}
+
+
+/* ---------- welcome polish ---------- */
+.hero-grid{position:relative}
+.hero-main,.hero-grid>.panel{position:relative;z-index:1}
+.bignum{position:absolute;z-index:0;right:0;top:50%;width:min(44vw,660px);height:auto;transform:translateY(-62%);pointer-events:none;overflow:visible}
+.bignum text{font-family:var(--display);font-weight:800;letter-spacing:-.06em;fill:none;stroke:rgba(255,255,255,.55);stroke-width:3}
+.facts{list-style:none;display:flex;flex-wrap:wrap;gap:10px}
+.facts li{font-weight:600;font-size:.9375rem;padding:7px 14px;border-radius:999px;background:rgba(18,13,69,.55);border:1.5px solid rgba(255,255,255,.35);color:#fff}
+#welcome .btn.primary{font-size:1.25rem;padding:20px 34px}
+#welcome .hero-main h1{text-shadow:0 2px 0 rgba(18,13,69,.25)}
+@media (max-width:860px){.bignum{display:none}#welcome .btn.primary{font-size:1.0625rem;padding:16px 26px}}
+@media (max-height:520px){.bignum,.facts{display:none}}
+@media (prefers-reduced-motion:no-preference){
+  #welcome h1{animation:enter .7s cubic-bezier(.2,.9,.2,1) .05s both}
+  #welcome h1 em{animation:wipe .6s cubic-bezier(.7,0,.2,1) .55s both}
+  #welcome .lede{animation:enter .7s cubic-bezier(.2,.9,.2,1) .25s both}
+  #welcome .cta-row{animation:enter .7s cubic-bezier(.2,.9,.2,1) .4s both}
+  #welcome .facts{animation:enter .7s cubic-bezier(.2,.9,.2,1) .5s both}
+  #welcome .panel{animation:enter .8s cubic-bezier(.2,.9,.2,1) .35s both}
+  #welcome .bignum text{stroke-dasharray:1600;animation:draw 1.8s cubic-bezier(.4,0,.2,1) .2s both}
+}
+@keyframes enter{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+@keyframes wipe{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+@keyframes draw{from{stroke-dashoffset:1600}to{stroke-dashoffset:0}}
+@media print{.bignum,.facts{display:none!important}}
+
+/* welcome layout refinements */
+.hero-grid>.panel{align-self:end}
+.bignum{top:0;transform:none;width:min(31vw,470px)}
+#welcome .hero-main{gap:clamp(14px,2.4vh,28px)}
+@media (min-width:861px) and (max-height:800px){.bignum{display:none}}
