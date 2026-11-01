@@ -4,12 +4,20 @@ name: Tests
 # so check the green tick (or the Actions tab) before sharing a new version of the survey.
 on:
   push:
+    branches-ignore: [ci-report]
   pull_request:
+
+permissions:
+  contents: write      # only used to save a failure report on the ci-report branch
 
 jobs:
   test:
-    runs-on: ubuntu-24.04   # pinned: ubuntu-latest is moving to Ubuntu 26, which the test browser install may not support yet
+    # ubuntu-latest is moving to Ubuntu 26, which the test browser install may not support yet.
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
+    defaults:
+      run:
+        shell: bash
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
@@ -17,22 +25,48 @@ jobs:
           node-version: 22
           cache: npm
       - name: Install packages
-        run: npm ci
+        run: npm ci 2>&1 | tee ci-install.log
       - name: Install the test browser
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install --with-deps chromium 2>&1 | tee ci-browser.log
 
       # Each check below runs even if an earlier one failed, so one run shows everything that is wrong.
       - name: Apps Script unit tests
         if: ${{ !cancelled() }}
-        run: npm run test:script
-      - name: Browser tests (survey, keyboard, accessibility, layout)
+        run: npm run test:script 2>&1 | tee ci-unit.log
+      - name: Browser tests (survey, keyboard, accessibility, layout, dashboard)
         if: ${{ !cancelled() }}
-        run: npm run test:ui
+        run: npm run test:ui 2>&1 | tee ci-ui.log
       - name: Lighthouse scores
         if: ${{ !cancelled() }}
         run: |
           export CHROME_PATH="$(node -e "console.log(require('@playwright/test').chromium.executablePath())")"
-          npm run lighthouse
+          npm run lighthouse 2>&1 | tee ci-lighthouse.log
+
+      # When something fails, save the important lines on a separate branch so they can be read
+      # without opening the run page. Deleting the ci-report branch is always safe.
+      - name: Save a failure report
+        if: ${{ failure() && github.ref == 'refs/heads/main' }}
+        run: |
+          {
+            echo "Tests run #${{ github.run_number }} for commit ${{ github.sha }}"
+            for f in ci-install.log ci-browser.log ci-unit.log ci-ui.log ci-lighthouse.log; do
+              echo; echo "=== $f ==="
+              if [ -f "$f" ]; then
+                grep -E "✘|failed|passed|Error:|Expected|Received|Timeout|exit code|not ok|FAIL|npm error|npm ERR" "$f" | head -n 60
+                echo "--- last 25 lines ---"; tail -n 25 "$f"
+              else
+                echo "(this step did not run)"
+              fi
+            done
+          } > /tmp/ci-report.txt
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git checkout --orphan ci-report
+          git rm -rf --quiet .
+          cp /tmp/ci-report.txt ci-report.txt
+          git add ci-report.txt
+          git commit --quiet -m "Failure report for Tests run #${{ github.run_number }}"
+          git push --force origin ci-report
 
       - uses: actions/upload-artifact@v6
         if: ${{ failure() }}
