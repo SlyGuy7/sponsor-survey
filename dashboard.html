@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self' https://script.google.com https://script.googleusercontent.com; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex,nofollow">
+<meta name="color-scheme" content="light dark">
+<title>Results – Sponsor Experience Survey</title>
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="assets/fonts/bricolage-grotesque-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/dashboard.css">
+<noscript><link rel="stylesheet" href="assets/noscript.css"></noscript>
+</head>
+<body>
+<header class="top">
+  <div class="top-in">
+    <span class="logo-pill"><img src="assets/njit-logo.png" width="184" height="77" alt="New Jersey Institute of Technology"></span>
+    <div class="top-title"><h1>Survey results</h1><p id="updated">Private page for the Operations team</p></div>
+    <div class="top-actions">
+      <button id="refresh" class="btn" type="button" hidden>Refresh</button>
+      <button id="csv" class="btn" type="button" hidden>Download CSV</button>
+    </div>
+  </div>
+</header>
+<main id="main">
+  <noscript><p class="note">This page needs JavaScript.</p></noscript>
+  <section id="gate" class="card gate" aria-labelledby="gateH">
+    <h2 id="gateH">Enter the results key</h2>
+    <p>The key is created in Apps Script by running <code>createDashboardKey</code>. Only share it with the Operations team and the professor. It is never stored in the website.</p>
+    <form id="gateForm" autocomplete="off">
+      <label for="keyIn">Results key</label>
+      <input id="keyIn" type="password" autocomplete="one-time-code" spellcheck="false" required>
+      <button class="btn primary" type="submit">Show results</button>
+    </form>
+  </section>
+  <p id="msg" class="msg" role="status" aria-live="polite" hidden></p>
+  <div id="out" hidden>
+    <section id="tiles" class="tiles" aria-label="Summary"></section>
+    <div id="parts"></div>
+  </div>
+</main>
+<script src="assets/dashboard.js"></script>
+</body>
+</html>

@@ -11,9 +11,9 @@ const server = spawn('python3', ['-m', 'http.server', String(port), '--bind', '1
 const lh = path.join(__dirname, '..', 'node_modules', '.bin', 'lighthouse');
 let failed = false;
 try {
-  for (const preset of ['mobile', 'desktop']) {
-    const out = path.join(os.tmpdir(), `lh-${preset}.json`);
-    const args = [`http://127.0.0.1:${port}/index.html`, '--chrome-flags=--headless=new --no-sandbox', '--output=json', `--output-path=${out}`, '--quiet'];
+  for (const [page, preset] of [['index.html', 'mobile'], ['index.html', 'desktop'], ['dashboard.html', 'mobile'], ['dashboard.html', 'desktop']]) {
+    const out = path.join(os.tmpdir(), `lh-${page}-${preset}.json`);
+    const args = [`http://127.0.0.1:${port}/${page}`, '--chrome-flags=--headless=new --no-sandbox', '--output=json', `--output-path=${out}`, '--quiet'];
     if (preset === 'desktop') args.push('--preset=desktop');
     try { execFileSync(lh, args, { stdio: 'ignore', timeout: 120000, env: process.env }); }
     catch (e) { console.error('Lighthouse failed to run (is Chrome installed? set CHROME_PATH):', e.message); failed = true; continue; }
@@ -21,7 +21,7 @@ try {
     for (const [cat, min] of Object.entries(MIN)) {
       const score = r.categories[cat].score;
       const ok = score >= min;
-      console.log(`${preset.padEnd(8)} ${cat.padEnd(15)} ${Math.round(score * 100)} ${ok ? 'ok' : 'FAIL (needs ' + Math.round(min * 100) + ')'}`);
+      console.log(`${page.padEnd(15)} ${preset.padEnd(8)} ${cat.padEnd(15)} ${Math.round(score * 100)} ${ok ? 'ok' : 'FAIL (needs ' + Math.round(min * 100) + ')'}`);
       if (!ok) failed = true;
     }
   }

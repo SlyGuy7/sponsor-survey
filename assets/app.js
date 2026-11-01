@@ -3,11 +3,12 @@
 
 /* ---------- configuration ---------- */
 const ENDPOINT = 'https://script.google.com/macros/s/AKfycbwBxJbu22vcLFs9wwNe2_FlNMnvDnc9Lntr7zteddkXoKNfT--q7UE7JIuWLiiOO3epng/exec';
-const STORE = 'njit-sponsor-survey-v2';
+const STORE = 'njit-sponsor-survey-v3';
 const PREF = 'njit-sponsor-survey-prefs';
 const TTL = 24 * 60 * 60 * 1000;          // saved progress expires after 24 hours
 const SEND_TIMEOUT = 20000;
 const AUTO_MS = 480;
+const TOAST_MS = 2800;
 
 /* ---------- small helpers ---------- */
 const $ = s => document.querySelector(s);
@@ -19,12 +20,24 @@ const coarse = () => matchMedia('(pointer:coarse)').matches;
 const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+// One icon per part (24x24, drawn with a stroke).
+const ICON_PATHS = {
+  A: 'M4 21V5l8-2v18M12 9l8 2v10M8 9h.01M8 13h.01M8 17h.01M16 15h.01M16 18h.01',
+  B: 'M9 4h6v3H9zM7 5H6a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-1M8 12h8M8 16h5',
+  C: 'M4 5h16v10H9l-5 4z',
+  D: 'M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z',
+  E: 'M3 9h18v11H3zM8 9V6h8v3M3 14h18',
+  X: 'M12 5v14M5 12h14',
+};
+const icon = id => `<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="${ICON_PATHS[id] || ICON_PATHS.X}"/></svg>`;
+const CHECK = '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+
 const canStore = safe(() => { localStorage.setItem('__t', '1'); localStorage.removeItem('__t'); return true; }, false);
 const welcome = $('#welcome'), qs = $('#q'), done = $('#done'), stage = $('#stage'), wrap = $('#wrap');
 
 let DATA, PARTS, QS, SCREENS;
-let ans = {}, pos = -1, hist = [], busy = false, sid = null, autoT = null, started = 0;
-let lastPayload = null, sending = false, lastInput = 'key';
+let ans = {}, pos = -1, hist = [], busy = false, sid = null, autoT = null, toastT = null, started = 0;
+let lastPayload = null, sending = false, lastInput = 'key', recap = null;
 let quick = safe(() => localStorage.getItem(PREF) !== 'off', true);
 
 /* ---------- storage (contact details are never written to disk) ---------- */
@@ -61,12 +74,11 @@ function qAnswered(q) {
   if (q.type === 'single') return !!a.v;
   return a !== '';
 }
-const screenPart = () => { const s = SCREENS[pos]; return s ? (s.kind === 'intro' ? s.part.id : s.q.part) : null; };
-const partHasQuestions = id => QS.some(q => q.part === id && !skipped(q));
-const skipScreen = s => s.kind === 'q' ? skipped(s.q) : !partHasQuestions(s.part.id);
-const isLast = () => !SCREENS.slice(pos + 1).some(s => s.kind === 'q' && !skipped(s.q));
+const screenPart = () => { const s = SCREENS[pos]; return s ? s.q.part : null; };
+const isLast = () => !SCREENS.slice(pos + 1).some(s => !skipped(s.q));
 const numbered = () => QS.filter(q => q.n && !skipped(q));
 const total = () => QS.filter(q => q.n).length;
+const isFirstOfPart = q => QS.find(x => x.part === q.part && !skipped(x)) === q;
 
 function progress() {
   const segs = $$('.seg');
@@ -96,38 +108,41 @@ function hintFor(q) {
   if (q.type === 'scale') return `Keys 1–${Math.min(9, 5 + (q.extra || []).length)} choose, Enter continues`;
   return 'Enter to continue';
 }
+function toast(msg) {
+  const t = $('#toast'); clearTimeout(toastT);
+  t.textContent = msg; t.classList.remove('show'); void t.offsetWidth; t.classList.add('show');
+  toastT = setTimeout(() => { t.classList.remove('show'); t.textContent = ''; }, TOAST_MS);
+}
+// Small celebrations when the respondent finishes a part or passes the halfway point.
+function celebrate(prev, next) {
+  if (!prev || !next) return;
+  const bits = [];
+  if (prev.part !== next.part) bits.push((partOf(prev.part).label || 'Part') + ' complete');
+  if (prev.n && prev.n <= 10 && next.n && next.n > 10) bits.push('Halfway there');
+  if (bits.length) toast(bits.join('. '));
+}
 function render() {
-  const s = SCREENS[pos], part = partOf(screenPart());
+  const q = SCREENS[pos].q, part = partOf(q.part);
   clearTimeout(autoT);
+  qs.dataset.part = part.id;
+  $('#partIcon').innerHTML = icon(part.id);
   $('#partName').textContent = part.label;
   $('#partTitle').textContent = part.name;
   $('#back').disabled = false;
-  qs.classList.toggle('intro', s.kind === 'intro');
-  let html, heading;
-  if (s.kind === 'intro') {
-    $('#bignum').textContent = part.id === 'X' ? '+' : part.id;
-    $('#railCount').textContent = part.id === 'X' ? 'Optional' : 'Part ' + (PARTS.indexOf(part) + 1) + ' of ' + PARTS.filter(p => p.id !== 'X').length;
-    html = `<div class="intro-body in"><h1 class="intro-h" id="qt" tabindex="-1" aria-describedby="railCount">${esc(part.name)}</h1><p>${esc(part.note)}</p></div>`;
-    $('#next').innerHTML = 'Let&rsquo;s go &rarr;';
-    $('#hint').textContent = 'Enter to continue';
-    heading = part.name;
-  } else {
-    const q = s.q;
-    $('#bignum').textContent = q.n ? String(q.n).padStart(2, '0') : '+' + q.bonus;
-    $('#railCount').textContent = q.n ? 'Question ' + q.n + ' of ' + total() : 'Optional';
-    html = `<div class="in"><h1 class="qtext" id="qt" tabindex="-1" aria-describedby="railCount">${esc(q.text)}</h1><p class="qhint" id="qh">${esc(q.hint || (q.optional ? 'Optional.' : ''))}</p><div id="ctl"></div><div class="err" id="err" role="alert"></div></div>`;
-    $('#next').innerHTML = nextLabel(q);
-    $('#hint').textContent = hintFor(q);
-    heading = q.text;
-  }
-  stage.innerHTML = html; wrap.scrollTop = 0;
-  if (s.kind === 'q') drawCtl(s.q);
+  $('#bignum').textContent = q.n ? String(q.n).padStart(2, '0') : '+' + q.bonus;
+  $('#railCount').textContent = q.n ? 'Question ' + q.n + ' of ' + total() : 'Optional';
+  const banner = isFirstOfPart(q) ? `<div class="part-banner">${icon(part.id)}<div><b>${esc(part.label)}: ${esc(part.name)}</b><span>${esc(part.note)}</span></div></div>` : '';
+  stage.classList.toggle('wide', q.type === 'grid');
+  stage.innerHTML = `<div class="in">${banner}<h1 class="qtext" id="qt" tabindex="-1" aria-describedby="railCount">${esc(q.text)}</h1><p class="qhint" id="qh">${esc(q.hint || (q.optional ? 'Optional.' : ''))}</p><div id="ctl"></div><div class="err" id="err" role="alert"></div></div>`;
+  wrap.scrollTop = 0;
+  $('#next').innerHTML = nextLabel(q);
+  $('#hint').textContent = hintFor(q);
+  drawCtl(q);
   progress(); save();
-  document.title = (s.kind === 'q' && s.q.n ? 'Question ' + s.q.n + ' of ' + total() : part.name) + ' – Sponsor Experience Survey';
+  document.title = (q.n ? 'Question ' + q.n + ' of ' + total() : part.name) + ' – Sponsor Experience Survey';
   // focus: text fields on devices with a keyboard, otherwise the heading so assistive technology reads it
-  const field = s.kind === 'q' && (s.q.type === 'text' || s.q.type === 'contact') && !coarse() ? stage.querySelector('input,textarea') : null;
-  // ...unless the person has already moved focus into the new screen, e.g. tabbed to an answer, in which case leave it there
-  setTimeout(() => { if (!stage.contains(document.activeElement)) (field || $('#qt')).focus({ preventScroll: true }); }, 60);
+  const field = (q.type === 'text' || q.type === 'contact') && !coarse() ? stage.querySelector('input,textarea') : null;
+  setTimeout(() => { if (stage.contains(document.activeElement)) return; (field || $('#qt')).focus({ preventScroll: true }); }, 60);
 }
 
 function drawCtl(q) {
@@ -147,9 +162,11 @@ function drawCtl(q) {
       (ex.length ? `<div class="opts extra">` + ex.map((e, i) => `<label class="opt${a === e ? ' sel' : ''}"><input class="vh" type="radio" name="${q.key}" value="${esc(e)}"${a === e ? ' checked' : ''}><span class="key" aria-hidden="true">${6 + i}</span><span>${esc(e)}</span></label>`).join('') + `</div>` : '') + `</fieldset>`;
   } else if (q.type === 'grid') {
     const nums = q.cols.every(x => /^\d$|Not sure/.test(x));
-    c.className = 'grid';
-    c.innerHTML = q.rows.map((r, ri) => `<fieldset class="row${a && a[ri] !== undefined ? ' done' : ''}" data-r="${ri}"><legend>${esc(r)}</legend><i aria-hidden="true">&check;</i><div class="pills${nums ? ' nums' : ''}">` +
-      q.cols.map((cl, ci) => `<label class="pill${a && a[ri] === cl ? ' sel' : ''}"><input class="vh" type="radio" name="${q.key}_${ri}" value="${ci}"${a && a[ri] === cl ? ' checked' : ''}><span>${esc(cl)}</span></label>`).join('') + `</div></fieldset>`).join('');
+    c.className = 'grid' + (nums ? ' nums' : '');
+    c.style.setProperty('--cols', q.cols.length);
+    const head = nums ? '' : `<div class="mx-head" aria-hidden="true"><span></span>${q.cols.map(cl => `<span>${esc(cl)}</span>`).join('')}</div>`;
+    c.innerHTML = head + q.rows.map((r, ri) => `<div class="row${a && a[ri] !== undefined ? ' done' : ''}" role="radiogroup" aria-labelledby="rl${ri}" data-r="${ri}"><div class="rl"><span id="rl${ri}">${esc(r)}</span><i aria-hidden="true">&check;</i></div><div class="pills${nums ? ' nums' : ''}">` +
+      q.cols.map((cl, ci) => `<label class="pill${a && a[ri] === cl ? ' sel' : ''}"><input class="vh" type="radio" name="${q.key}_${ri}" value="${ci}"${a && a[ri] === cl ? ' checked' : ''}><span class="cl">${esc(cl)}</span></label>`).join('') + `</div></div>`).join('');
   } else if (q.type === 'text') {
     c.innerHTML = `<textarea class="area" id="ta" maxlength="2000" aria-labelledby="qt" aria-describedby="qh cc-wrap" placeholder="Type your answer here">${esc(a || '')}</textarea><div class="count" id="cc-wrap"><span id="cc">${(a || '').length}</span> / 2000 characters</div>`;
   } else if (q.type === 'contact') {
@@ -202,10 +219,11 @@ function autoAdvance() {
   clearTimeout(autoT);
   if (quick && (lastInput === 'pointer' || lastInput === 'shortcut')) autoT = setTimeout(() => go(1), AUTO_MS);
 }
-const curQ = () => { const s = SCREENS && SCREENS[pos]; return s && s.kind === 'q' ? s.q : null; };
+const curQ = () => { const s = SCREENS && SCREENS[pos]; return s ? s.q : null; };
 
 stage.addEventListener('change', e => {
   const t = e.target, q = curQ(); if (!q || !t.matches('input.vh')) return;
+  if (lastInput === 'pointer' && navigator.vibrate && !reduced()) safe(() => navigator.vibrate(8));
   if (q.type === 'single' || q.type === 'multi') pickOpt(q, +t.value);
   else if (q.type === 'scale') pickScale(q, t.value in { 1: 1, 2: 2, 3: 3, 4: 4, 5: 5 } ? +t.value : t.value);
   else if (q.type === 'grid') pickCell(q, +t.name.split('_').pop(), +t.value);
@@ -246,21 +264,19 @@ function validate(q) {
   return true;
 }
 function nextIndex() {
-  let n = pos + 1; while (n < SCREENS.length && skipScreen(SCREENS[n])) n++; return n;
+  let n = pos + 1; while (n < SCREENS.length && skipped(SCREENS[n].q)) n++; return n;
 }
 function go(d) {
   if (busy || sending) return; clearTimeout(autoT);
   if (d > 0) {
-    const s = SCREENS[pos];
-    if (s.kind === 'q' && !validate(s.q)) return;
+    const q = curQ();
+    if (q && !validate(q)) return;
     const n = nextIndex();
     if (n >= SCREENS.length) return finish();
     hist.push(pos);
-    swap(() => { pos = n; render(); history.pushState({ sv: 1 }, '', '#q' + pos); });
-  } else if (hist.length) {
-    history.back();            // popstate does the work, so the browser Back button and ours behave the same
+    swap(() => { const prev = q; pos = n; render(); history.pushState({ sv: 1 }, '', '#q' + pos); celebrate(prev, curQ()); });
   } else {
-    history.back();
+    history.back();            // popstate does the work, so the browser Back button and ours behave the same
   }
 }
 function backStep() {
@@ -285,7 +301,7 @@ addEventListener('popstate', () => {
 
 /* ---------- submit ---------- */
 function payload() {
-  const o = { submissionId: sid, submittedAt: new Date().toISOString(), elapsedMs: Date.now() - started, hp: $('#hp').value, client: 'v2' };
+  const o = { submissionId: sid, submittedAt: new Date().toISOString(), elapsedMs: Date.now() - started, hp: $('#hp').value, client: 'v3' };
   QS.forEach(q => {
     const a = ans[q.key];
     if (skipped(q) || a === undefined || a === null) return;
@@ -316,24 +332,48 @@ async function send() {
     onFailure();
   } finally { clearTimeout(t); sending = false; $('#retry').disabled = false; }
 }
+
+/* ---------- thank-you recap, download, print ---------- */
+function answerText(q) {
+  const a = ans[q.key];
+  if (q.type === 'single') return a.v + (a.other && optOf(q, a) && optOf(q, a).other ? ' (' + a.other + ')' : '');
+  if (q.type === 'multi') return (a.v || []).join('; ') + (a.other && q.options.some(o => o.other && (a.v || []).includes(o.label)) ? ' (' + a.other + ')' : '');
+  if (q.type === 'grid') return q.rows.map((r, i) => r + ': ' + (a[i] || '')).join('\n');
+  if (q.type === 'contact') return [a.name, a.org, a.email].filter(x => x && String(x).trim()).join(', ');
+  return String(a);
+}
+function buildRecap() {
+  const parts = PARTS.map(p => { const list = QS.filter(q => q.part === p.id && !skipped(q)); return { p, n: list.filter(qAnswered).length, of: list.length }; });
+  const items = QS.filter(q => !skipped(q) && qAnswered(q)).map(q => ({ title: q.n ? 'Q' + q.n + '. ' + q.text : (q.title ? q.title + ': ' : '') + q.text, body: answerText(q) }));
+  const text = 'Sponsor Experience Survey: my answers\n' + new Date().toLocaleDateString() + '\n\n' + items.map(i => i.title + '\n' + i.body).join('\n\n') + '\n';
+  return { parts, items, text };
+}
+function renderRecap() {
+  recap = buildRecap();
+  $('#recapParts').innerHTML = recap.parts.map(r => `<li>${CHECK}<span><b>${esc(r.p.label === 'Bonus' ? 'Before you go' : r.p.label)}</b> ${esc(r.p.name)}</span><em>${r.n} of ${r.of}</em></li>`).join('');
+  $('#mineBody').innerHTML = '<dl>' + recap.items.map(i => `<dt>${esc(i.title)}</dt><dd>${esc(i.body).replace(/\n/g, '<br>')}</dd>`).join('') + '</dl>';
+  $('#recapParts').hidden = false; $('#mine').hidden = false; $('#afterRow').hidden = false;
+}
 function onSuccess() {
+  renderRecap();
   wipe(); lastPayload = null; ans = {};
   $('#doneH').innerHTML = 'Thank <em>you.</em>';
   $('#doneP').textContent = 'Your answers will shape what the next sponsor receives before their project begins.';
-  setStatus('ok', 'Your answers are in. Thank you.'); document.title = 'Thank you \u2013 Sponsor Experience Survey';
+  setStatus('ok', 'Your answers are in. Thank you.'); document.title = 'Thank you – Sponsor Experience Survey';
   $('#steps').hidden = false; $('#closeTab').hidden = false;
   confetti();
 }
 function onFailure() {
   $('#doneH').textContent = 'We could not confirm delivery';
   $('#doneP').textContent = canStore ? 'Nothing has been lost. Your answers are saved on this device.' : 'Use “Copy my answers” before you leave this page, because this browser cannot save them.';
-  setStatus('bad', 'We could not confirm that your answers arrived.'); document.title = 'Delivery not confirmed \u2013 Sponsor Experience Survey';
+  setStatus('bad', 'We could not confirm that your answers arrived.'); document.title = 'Delivery not confirmed – Sponsor Experience Survey';
   $('#retryRow').hidden = false; $('#failHelp').hidden = false;
 }
 function finish() {
   lastPayload = payload(); show(done); stage.innerHTML = '';
   document.title = 'Sending – Sponsor Experience Survey';
   $('#doneH').textContent = 'Sending…'; $('#steps').hidden = true; $('#closeTab').hidden = true;
+  ['#recapParts', '#mine', '#afterRow'].forEach(s => { $(s).hidden = true; });
   $('#doneH').focus({ preventScroll: true });
   send();
 }
@@ -342,13 +382,27 @@ $('#copy').addEventListener('click', async () => {
   try { await navigator.clipboard.writeText(JSON.stringify(lastPayload, null, 2)); $('#copy').textContent = 'Copied'; }
   catch (e) { $('#copy').textContent = 'Copy blocked by this browser'; }
 });
+$('#share').addEventListener('click', async () => {
+  const url = ($('link[rel=canonical]') || {}).href || location.href.split('#')[0];
+  try { await navigator.clipboard.writeText(url); $('#share').textContent = 'Link copied'; }
+  catch (e) { $('#share').textContent = url; }
+});
+$('#download').addEventListener('click', () => {
+  if (!recap) return;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([recap.text], { type: 'text/plain' }));
+  a.download = 'sponsor-survey-my-answers.txt';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+});
+$('#print').addEventListener('click', () => { $('#mine').open = true; window.print(); });
 
 /* ---------- confetti (success only, skipped for reduced motion) ---------- */
 function confetti() {
   if (reduced()) return;
   const cv = $('#fx'), cx = cv.getContext('2d'); const W = cv.width = cv.offsetWidth, H = cv.height = cv.offsetHeight;
   const root = getComputedStyle(document.documentElement);
-  const cols = ['--red', '--paper', '--paper', '--on-dark', '--pink'].map(v => root.getPropertyValue(v).trim() || '#fff');
+  const cols = ['--red', '--confetti', '--confetti', '--on-dark', '--pink'].map(v => root.getPropertyValue(v).trim() || '#fff');
   const P = Array.from({ length: 150 }, () => ({ x: Math.random() * W, y: -20 - Math.random() * H * .5, w: 6 + Math.random() * 8, h: 10 + Math.random() * 10, vy: 2 + Math.random() * 4, vx: -1.5 + Math.random() * 3, r: Math.random() * 6, vr: -.2 + Math.random() * .4, c: cols[Math.random() * cols.length | 0] }));
   const t0 = performance.now();
   (function tick(t) {
@@ -411,7 +465,6 @@ $('#back').addEventListener('click', () => go(-1));
 
 function applyConfig() {
   const cfg = DATA.config || {};
-  if (cfg.estimate) $('#estimate').textContent = cfg.estimate.replace(/ minutes?$/, '');
   if (cfg.contactEmail) $$('[data-contact]').forEach(el => { el.hidden = false; $$('[data-contact-link]').forEach(a => { a.href = 'mailto:' + cfg.contactEmail; a.textContent = cfg.contactEmail; }); });
 }
 async function boot() {
@@ -424,8 +477,7 @@ async function boot() {
   } catch (e) { $('#loadErr').hidden = false; return; }
   PARTS = DATA.parts; QS = DATA.questions;
   QS.forEach(q => { q.key = keyOf(q); });
-  SCREENS = [];
-  PARTS.forEach(p => { SCREENS.push({ kind: 'intro', part: p }); QS.filter(q => q.part === p.id).forEach(q => SCREENS.push({ kind: 'q', q })); });
+  SCREENS = QS.map(q => ({ q }));
   applyConfig(); initWelcome();
   $('#start').disabled = false;
 }

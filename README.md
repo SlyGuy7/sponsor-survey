@@ -23,6 +23,7 @@ Live site: https://slyguy7.github.io/sponsor-survey/
 | `assets/njit-logo.png`, `favicon.svg`, `og.png` | Logo, tab icon and link-preview image |
 | `apps-script/Code.gs` | The response collector. Not served by GitHub Pages; paste it into Apps Script |
 | `404.html` | Page shown for mistyped links |
+| `dashboard.html`, `assets/dashboard.js`, `assets/dashboard.css` | Private results page for the team (see below) |
 | `tests/`, `package.json`, `playwright.config.js`, `.github/workflows/test.yml` | Automated tests and the workflow that runs them |
 
 ## Change a question
@@ -46,10 +47,20 @@ Every push runs the checks in `.github/workflows/test.yml` (Actions tab on GitHu
 
 | Command | What it checks |
 | --- | --- |
-| `npm test` | 10 Apps Script unit tests, then 40 browser tests: the full survey, skip logic, validation, keyboard use, Back button, resume, all four failure modes, accessibility (axe on every screen type), layout at 13 screen sizes |
-| `npm run lighthouse` | Lighthouse performance 95+, accessibility and best practices 100, mobile and desktop |
+| `npm test` | 15 Apps Script unit tests, then browser tests: the full survey, skip logic, validation, keyboard use, Back button, resume, all four failure modes, accessibility (axe on every screen type in light and dark), layout at 16 screen sizes, the thank-you page, and the results dashboard |
+| `npm run lighthouse` | Lighthouse performance 90+, accessibility and best practices 100, on the survey and the dashboard, mobile and desktop |
 
 First time: `npm install` then `npx playwright install chromium`. The real response sheet is never contacted; the tests intercept the network request.
+
+## Results dashboard
+
+`dashboard.html` shows the team's results as charts, a heat table for the grid questions, the free-text answers (with a filter for the ones sponsors allowed us to quote) and a CSV download. It is private by key, not by hiding the page:
+
+1. In Apps Script, run `createDashboardKey` once. Open the Execution log and copy the key it prints.
+2. Open `https://slyguy7.github.io/sponsor-survey/dashboard.html#key=YOUR_KEY` (or open the page and paste the key into the form). The key is removed from the address bar as soon as the page reads it and is never stored.
+3. Share the key only with the Operations team and the professor. To replace it, run `createDashboardKey` again; the old key stops working immediately.
+
+The script never returns names, organizations, emails or submission IDs, so they cannot appear on the dashboard or in its CSV. Redeploy the script (new version) after updating `Code.gs`.
 
 ## Test by hand
 
@@ -58,6 +69,10 @@ python3 -m http.server 8000
 ```
 
 Open http://localhost:8000/. To test failure handling without touching the real sheet, point `ENDPOINT` at a local mock that returns `{"ok":true}`, an HTTP 500, or nothing.
+
+## Design
+
+Each part of the survey has its own rail color and icon, and a short banner on its first question. A message appears when a part is finished and at the halfway point. The welcome page draws the five parts as a staircase, grids become a matrix with column headings on wide screens, the page follows the device's light or dark setting, and the thank-you page offers a recap, a link to share, a downloadable copy of the answers and a print layout.
 
 ## Privacy
 

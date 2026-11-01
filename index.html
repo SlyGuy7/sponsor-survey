@@ -9,10 +9,11 @@
 <title>Sponsor Experience Survey</title>
 <meta name="description" content="A short survey about how project sponsors were prepared for NJIT capstone projects. 20 questions, contact details optional.">
 <meta name="theme-color" content="#1C1475">
+<meta name="color-scheme" content="light dark">
 <link rel="canonical" href="https://slyguy7.github.io/sponsor-survey/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Sponsor Experience Survey">
-<meta property="og:description" content="Help us help the next sponsor. 20 Questions.">
+<meta property="og:description" content="Help us help the next sponsor. 20 questions, mostly taps.">
 <meta property="og:url" content="https://slyguy7.github.io/sponsor-survey/">
 <meta property="og:image" content="https://slyguy7.github.io/sponsor-survey/assets/og.png">
 <meta property="og:image:width" content="1200">
@@ -45,26 +46,24 @@
         </div>
         <p id="restartNote" class="confirm-note" role="status" hidden></p>
         <p id="loadErr" class="load-err" role="alert" hidden>The survey questions could not be loaded. Please check your connection and reload the page.</p>
+        <h2 class="vh">What we will ask</h2>
+        <ol class="stair" aria-label="The five parts of the survey">
+          <li><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V5l8-2v18M12 9l8 2v10M8 9h.01M8 13h.01M8 17h.01M16 15h.01M16 18h.01"/></svg><b>A</b><span>About you</span></li>
+          <li><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4h6v3H9zM7 5H6a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-1M8 12h8M8 16h5"/></svg><b>B</b><span>Before kickoff</span></li>
+          <li><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v10H9l-5 4z"/></svg><b>C</b><span>Kickoff</span></li>
+          <li><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/></svg><b>D</b><span>Overall</span></li>
+          <li><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9h18v11H3zM8 9V6h8v3M3 14h18"/></svg><b>E</b><span>Readiness kit</span></li>
+        </ol>
       </div>
       <section class="panel" aria-label="About this survey">
         <div class="team">
-          <h2>Created by the Operations team</h2>
+          <h2>Created by the Operations Team</h2>
           <ul>
             <li><i aria-hidden="true">EA</i>Eugene Amparbeng</li>
             <li><i aria-hidden="true">MT</i>Mariah Torres</li>
             <li><i aria-hidden="true">GH</i>Gerard Herrera</li>
             <li><i aria-hidden="true">SV</i>Steven Vernikov</li>
           </ul>
-        </div>
-        <div>
-          <h2>What we will ask</h2>
-          <ol class="parts">
-            <li><b>A</b>About you and your organization</li>
-            <li><b>B</b>Before the project started</li>
-            <li><b>C</b>Kickoff and communication</li>
-            <li><b>D</b>Overall experience</li>
-            <li><b>E</b>A readiness kit for new sponsors</li>
-          </ol>
         </div>
         <p class="fine privacy"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3z"/></svg><span>Anonymous unless you choose to leave contact details at the end. Answers go to a private Google Sheet that only the Operations team and the course professor can open. We will not quote you without permission, and results are shared as summaries.<span data-contact hidden> Questions or a request to delete your answers: <a data-contact-link href="#"></a>.</span></span></p>
       </section>
@@ -73,12 +72,12 @@
   </div>
 </section>
 
-<!-- QUESTION / INTRO -->
+<!-- QUESTIONS -->
 <section id="q" class="screen q" aria-label="Survey">
   <div class="rail">
     <div class="rail-top">
       <span class="logo-pill"><img src="assets/njit-logo.png" width="184" height="77" alt="New Jersey Institute of Technology"></span>
-      <div><div class="part-name" id="partName"></div><div class="part-title" id="partTitle"></div></div>
+      <div class="part-head"><span class="part-ic" id="partIcon" aria-hidden="true"></span><div><div class="part-name" id="partName"></div><div class="part-title" id="partTitle"></div></div></div>
     </div>
     <div class="bignum" id="bignum" aria-hidden="true">01</div>
     <div class="rail-end"><div class="rail-bot"><i></i><span id="railCount"></span></div><div class="rail-copy">&copy; 2026 Operations Team</div></div>
@@ -86,6 +85,7 @@
   <div class="pane">
     <div class="prog" id="prog" aria-hidden="true"></div>
     <progress id="progress" class="vh" max="100" value="0" aria-label="Survey progress" aria-valuetext="0 of 20 questions answered"></progress>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <div class="stage-wrap" id="wrap"><div class="stage" id="stage"></div></div>
     <div class="nav">
       <button class="back" id="back" type="button">&larr; Back</button>
@@ -112,11 +112,18 @@
       <button class="btn ghost" id="copy" type="button">Copy my answers</button>
     </div>
     <p class="fine" id="failHelp" hidden>Your answers are not lost: keep this tab open and try again, or copy them and send them to us.<span data-contact hidden> Contact: <a data-contact-link href="#"></a>.</span></p>
+    <ol class="recap-parts" id="recapParts" aria-label="What you completed" hidden></ol>
     <div class="steps" id="steps" role="group" aria-label="What happens next" hidden>
       <div class="step"><b>1</b>The Operations team reads every response.</div>
       <div class="step"><b>2</b>We turn patterns into a sponsor readiness kit.</div>
       <div class="step"><b>3</b>We share a summary with the professor and, if you asked, with you.</div>
     </div>
+    <div class="cta-row" id="afterRow" hidden>
+      <button class="btn primary" id="share" type="button">Copy a link for another sponsor</button>
+      <button class="btn ghost" id="download" type="button">Download my answers</button>
+      <button class="btn ghost" id="print" type="button">Print my answers</button>
+    </div>
+    <details class="mine" id="mine" hidden><summary>Review my answers</summary><div id="mineBody"></div></details>
     <p class="fine" id="closeTab" hidden>You can close this tab. Thank you for the work you put into our students' projects.</p>
     <footer class="site-foot"><span><b>&copy; 2026 Operations Team</b> &middot; Capstone, Fall 2026</span><span>Your answers are used only to improve the sponsor experience.</span></footer>
   </div>

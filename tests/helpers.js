@@ -18,7 +18,6 @@ async function mockEndpoint(page, initial = 'ok') {
 }
 
 const KIND = () => {
-  if (document.querySelector('.intro-body')) return 'intro';
   if (document.querySelector('#ctl .sc')) return 'scale';
   if (document.querySelector('#ctl .pill')) return 'grid';
   if (document.querySelector('#ctl textarea')) return 'text';
@@ -56,14 +55,12 @@ async function answerAll(page, opts = {}) {
 // Quick mode (auto-advance after a tap) is switched off for tests that click "Next" themselves, so they cannot race the timer.
 const disableQuick = page => page.addInitScript(() => localStorage.setItem('njit-sponsor-survey-prefs', 'off'));
 
-// Opens the survey and lands on question 1 (past the Part A intro screen).
+// Opens the survey and lands on question 1.
 async function startSurvey(page, { quick = false } = {}) {
   if (!quick) await disableQuick(page);
   await page.goto('/index.html');
   await page.waitForFunction(() => !document.querySelector('#start').disabled);
   await page.click('#start');
-  await page.waitForSelector('.intro-body');
-  await page.click('#next');
   await page.waitForSelector('.qtext');
 }
 

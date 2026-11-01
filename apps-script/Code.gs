@@ -14,6 +14,9 @@
  * The "Responses" tab is created and formatted automatically. If a tab with that name already exists
  * with a different layout, it is renamed to "Responses (old ...)" and a fresh one is created.
  * To re-apply the formatting at any time, run setupSheet from the editor.
+ *
+ * Results dashboard: run createDashboardKey once (open View > Logs or the Execution log to read the key),
+ * then open dashboard.html on your site and paste the key. Run it again to replace the key.
  */
 var SHEET_ID = 'PASTE_SHEET_ID_HERE';
 var SHEET_NAME = 'Responses';
@@ -306,7 +309,42 @@ function getSheet_() {
 // Run this from the editor to (re)apply the formatting.
 function setupSheet() { setupSheet_(getSheet_()); }
 
-function doGet() { return json_({ ok: true, service: 'sponsor-survey' }); }
+// ---- Results for the team's dashboard (dashboard.html) -------------------------------------------
+// Protected by a secret key kept in Script Properties, never in the website. Contact details are never returned.
+function createDashboardKey() {
+  var key = Utilities.getUuid().replace(/-/g, '') + Utilities.getUuid().replace(/-/g, '').slice(0, 8);
+  PropertiesService.getScriptProperties().setProperty('DASHBOARD_KEY', key);
+  Logger.log('Dashboard key: ' + key);
+  return key;
+}
+
+function summary_() {
+  var sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(SHEET_NAME);
+  if (!sheet || sheet.getLastRow() < 2) return { ok: true, count: 0, rows: [] };
+  var have = sheet.getRange(1, 1, 1, HEADERS.length).getValues()[0].join('|');
+  if (have !== HEADERS.join('|')) return { ok: false, error: 'unexpected layout' };
+  var values = sheet.getRange(2, 1, sheet.getLastRow() - 1, COLUMNS.length).getValues();
+  var rows = values.map(function (r) {
+    var o = {};
+    COLUMNS.forEach(function (c, i) {
+      if (/^contact_/.test(c.key) || c.key === 'submissionId') return;          // never leave the sheet
+      var v = r[i];
+      o[c.key] = v instanceof Date ? v.toISOString() : v;
+    });
+    return o;
+  });
+  return { ok: true, count: rows.length, generatedAt: new Date().toISOString(), rows: rows };
+}
+
+function doGet(e) {
+  var p = (e && e.parameter) || {};
+  if (p.action === 'summary') {
+    var key = PropertiesService.getScriptProperties().getProperty('DASHBOARD_KEY');
+    if (!key || !p.key || String(p.key) !== key) return json_({ ok: false, error: 'not allowed' });
+    try { return json_(summary_()); } catch (err) { return json_({ ok: false, error: 'server error' }); }
+  }
+  return json_({ ok: true, service: 'sponsor-survey' });
+}
 
 function doPost(e) {
   var lock = LockService.getScriptLock();

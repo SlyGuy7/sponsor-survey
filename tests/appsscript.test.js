@@ -4,17 +4,18 @@ const assert = require('node:assert');
 const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
+const crypto = require('crypto');
 
 const code = fs.readFileSync(path.join(__dirname, '..', 'apps-script', 'Code.gs'), 'utf8');
 const chain = () => new Proxy(function () {}, { get: (t, p) => (p === 'then' ? undefined : () => chain()), apply: () => chain() });
 
 function load({ existingHeader } = {}) {
-  const state = { rows: existingHeader ? [existingHeader, ['old', 'row']] : [], renamed: null, created: 0 };
+  const state = { rows: existingHeader ? [existingHeader, ['old', 'row']] : [], renamed: null, created: 0, props: {}, logged: [] };
   const makeSheet = () => ({
     getLastRow: () => state.rows.length,
     appendRow: r => state.rows.push(r),
-    getRange: (r, c, n) => ({
-      getValues: () => (r === 1 ? [state.rows[0] || []] : state.rows.slice(r - 1, r - 1 + n).map(x => [x[c - 1]])),
+    getRange: (r, c, n, m) => ({
+      getValues: () => (r === 1 ? [state.rows[0] || []] : state.rows.slice(r - 1, r - 1 + n).map(x => x.slice(c - 1, c - 1 + (m || 1)))),
       setValues: v => { if (!state.rows.length) state.rows.push(v[0]); else state.rows[0] = v[0]; },
       setBackground: chain, setFontColor: chain, setFontWeight: chain, setFontSize: chain, setWrap: chain,
       setVerticalAlignment: chain, setHorizontalAlignment: chain, setFontFamily: chain, setNumberFormat: chain,
@@ -35,7 +36,9 @@ function load({ existingHeader } = {}) {
         insertSheet: () => { state.created++; state.rows = []; sheet = makeSheet(); return sheet; },
       }),
     },
-    Utilities: { formatDate: () => '2026-10-31 0600' },
+    Utilities: { formatDate: () => '2026-10-31 0600', getUuid: () => crypto.randomUUID() },
+    PropertiesService: { getScriptProperties: () => ({ getProperty: k => (k in state.props ? state.props[k] : null), setProperty: (k, v) => { state.props[k] = v; } }) },
+    Logger: { log: s => state.logged.push(s) },
     Date, JSON, String, Number, Math,
   };
   vm.createContext(ctx);
@@ -117,4 +120,51 @@ test('every survey question has a column', () => {
     const prefix = 'Q' + q.n + '.';
     assert.ok(headers.some(h => h.startsWith(prefix)), 'no column for question ' + q.n);
   }
+});
+
+const get = (ctx, params) => JSON.parse(ctx.doGet({ parameter: params }).t);
+
+test('dashboard: no key set means nobody can read results', () => {
+  const { ctx, post } = load(); post(base);
+  assert.deepStrictEqual(get(ctx, { action: 'summary', key: 'anything' }), { ok: false, error: 'not allowed' });
+  assert.deepStrictEqual(get(ctx, { action: 'summary' }), { ok: false, error: 'not allowed' });
+});
+
+test('dashboard: createDashboardKey makes a long random key and only that key works', () => {
+  const { ctx, state, post } = load(); post(base);
+  const key = ctx.createDashboardKey();
+  assert.ok(key.length >= 40);
+  assert.strictEqual(state.props.DASHBOARD_KEY, key);
+  assert.ok(state.logged.some(l => l.includes(key)));
+  assert.strictEqual(get(ctx, { action: 'summary', key: key + 'x' }).ok, false);
+  assert.strictEqual(get(ctx, { action: 'summary', key: key.slice(1) }).ok, false);
+  assert.strictEqual(get(ctx, { action: 'summary', key }).ok, true);
+  const second = ctx.createDashboardKey();
+  assert.notStrictEqual(second, key);
+  assert.strictEqual(get(ctx, { action: 'summary', key }).ok, false, 'the old key stops working');
+});
+
+test('dashboard: results never include contact details or submission IDs', () => {
+  const { ctx, post } = load();
+  post({ ...base, contact_name: 'Pat Private', contact_org: 'Acme', contact_email: 'pat@example.com', q16: 4 });
+  const key = ctx.createDashboardKey();
+  const out = get(ctx, { action: 'summary', key });
+  assert.strictEqual(out.count, 1);
+  const text = JSON.stringify(out);
+  assert.ok(!/Pat Private|Acme|pat@example\.com|submissionId|contact_|s-1/.test(text), text);
+  assert.strictEqual(out.rows[0].q16, 4);
+  assert.match(out.rows[0].receivedAt, /^\d{4}-\d{2}-\d{2}T/);
+});
+
+test('dashboard: an empty sheet returns zero rows, an unexpected layout is refused', () => {
+  const empty = load(); const k1 = empty.ctx.createDashboardKey();
+  assert.deepStrictEqual(get(empty.ctx, { action: 'summary', key: k1 }), { ok: true, count: 0, rows: [] });
+  const old = load({ existingHeader: ['submittedAt', 'submissionId'] }); const k2 = old.ctx.createDashboardKey();
+  assert.deepStrictEqual(get(old.ctx, { action: 'summary', key: k2 }), { ok: false, error: 'unexpected layout' });
+});
+
+test('dashboard: plain doGet still just reports the service is up', () => {
+  const { ctx } = load();
+  assert.deepStrictEqual(get(ctx, {}), { ok: true, service: 'sponsor-survey' });
+  assert.deepStrictEqual(JSON.parse(ctx.doGet().t), { ok: true, service: 'sponsor-survey' });
 });

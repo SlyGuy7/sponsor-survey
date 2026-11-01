@@ -53,10 +53,10 @@ test.describe('completing the survey', () => {
     expect(ctl.bodies).toHaveLength(1);
     expect(kinds.filter(k => k !== 'intro')).toHaveLength(23);   // 20 questions + 3 optional
     const payload = JSON.parse(ctl.bodies[0]);
-    expect(payload).toMatchObject({ client: 'v2', hp: '', contact_email: 'a@b.co', q10: 'Scope or goals' });
+    expect(payload).toMatchObject({ client: 'v3', hp: '', contact_email: 'a@b.co', q10: 'Scope or goals' });
     expect(payload.q11).toBeTruthy();
     expect(payload.elapsedMs).toBeGreaterThan(0);
-    expect(await page.evaluate(() => localStorage.getItem('njit-sponsor-survey-v2'))).toBeNull();
+    expect(await page.evaluate(() => localStorage.getItem('njit-sponsor-survey-v3'))).toBeNull();
   });
 
   test('skip logic: "Nothing was delayed" removes question 11', async ({ page }) => {
@@ -79,7 +79,7 @@ test.describe('completing the survey', () => {
       await expect(page.locator('#retryRow')).toBeVisible();
       await expect(page.locator('#steps')).toBeHidden();
       await expect(page.locator('#closeTab')).toBeHidden();
-      expect(await page.evaluate(() => localStorage.getItem('njit-sponsor-survey-v2'))).not.toBeNull();
+      expect(await page.evaluate(() => localStorage.getItem('njit-sponsor-survey-v3'))).not.toBeNull();
       ctl.mode = 'ok';
       await page.click('#retry');
       await expect(page.locator('#doneH')).toContainText('Thank');
@@ -93,7 +93,7 @@ test.describe('completing the survey', () => {
     await startSurvey(page);
     await answerAll(page, { email: 'private@example.com' });
     await expect(page.locator('#doneH')).toHaveText('We could not confirm delivery');
-    const stored = await page.evaluate(() => localStorage.getItem('njit-sponsor-survey-v2'));
+    const stored = await page.evaluate(() => localStorage.getItem('njit-sponsor-survey-v3'));
     expect(stored).not.toContain('private@example.com');
     expect(stored).not.toContain('contact');
   });
@@ -181,9 +181,6 @@ test.describe('keyboard, history and resume', () => {
     await expect(QUESTION(page)).toContainText('organization');
     await page.waitForTimeout(400);                                        // let the screen transition finish, as a person would
     await page.goBack();
-    await expect(page.locator('.intro-body')).toBeVisible();              // the Part A intro screen
-    await page.waitForTimeout(400);
-    await page.goBack();
     await expect(page.locator('#welcome')).toHaveClass(/on/);
   });
 
@@ -201,8 +198,7 @@ test.describe('keyboard, history and resume', () => {
     await expect(page.locator('#q')).not.toHaveClass(/on/);               // first click only arms it
     await page.click('#restart');
     await expect(page.locator('#q')).toHaveClass(/on/);
-    await expect(page.locator('.intro-body')).toBeVisible();              // fresh start: back at the Part A intro
-    await page.click('#next');
+    await expect(page.locator('.qtext')).toContainText('organization');   // fresh start: back at question 1
     expect(await page.locator('#ctl .opt.sel').count()).toBe(0);           // earlier answers are gone
   });
 });

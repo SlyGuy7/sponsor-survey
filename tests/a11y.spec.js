@@ -24,7 +24,7 @@ test('no axe violations on any screen type, including both end states', async ({
     if (!seen.has(kind)) { seen.add(kind); await page.waitForTimeout(200); await scan(page, 'screen ' + kind); }
     await answerCurrent(page); await page.waitForTimeout(150); await page.click('#next'); await page.waitForTimeout(300);
   }
-  expect([...seen].sort()).toEqual(['contact', 'grid', 'intro', 'multi', 'scale', 'single', 'text']);
+  expect([...seen].sort()).toEqual(['contact', 'grid', 'multi', 'scale', 'single', 'text']);
   await page.waitForTimeout(1200);
   await scan(page, 'done (failure)');
 });
@@ -46,7 +46,29 @@ test('landmarks, headings and live regions', async ({ page }) => {
 test('answer groups are real fieldsets with native radios', async ({ page }) => {
   await page.goto('/index.html');
   await page.waitForFunction(() => !document.querySelector('#start').disabled);
-  await page.click('#start'); await page.click('#next'); await page.waitForSelector('#ctl fieldset');
+  await page.click('#start'); await page.waitForSelector('#ctl fieldset');
   expect(await page.locator('#ctl fieldset input[type=radio]').count()).toBeGreaterThan(3);
   await expect(page.locator('#ctl fieldset')).toHaveAttribute('aria-labelledby', 'qt');
+});
+
+test.describe('dark colour scheme', () => {
+  test.use({ colorScheme: 'dark' });
+  test('no axe violations on the screens that change in dark mode', async ({ page }) => {
+    test.setTimeout(120000);
+    await disableQuick(page);
+    await mockEndpoint(page, 'ok');
+    await page.goto('/index.html');
+    await page.waitForFunction(() => !document.querySelector('#start').disabled);
+    await scan(page, 'dark welcome');
+    await page.click('#start'); await page.waitForTimeout(300);
+    const seen = new Set();
+    for (let i = 0; i < 80 && !(await isDone(page)); i++) {
+      const kind = await page.evaluate(KIND);
+      await answerCurrent(page);
+      if (!seen.has(kind)) { seen.add(kind); await page.waitForTimeout(250); await scan(page, 'dark ' + kind); }
+      await page.waitForTimeout(150); await page.click('#next'); await page.waitForTimeout(300);
+    }
+    await page.waitForTimeout(1200);
+    await scan(page, 'dark done');
+  });
 });
