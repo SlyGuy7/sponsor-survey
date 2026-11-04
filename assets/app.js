@@ -161,7 +161,7 @@ function drawCtl(q) {
       `</div><div class="scale-lbl" id="scaleLbl"><span>1 = ${esc(q.low || '')}</span><span>5 = ${esc(q.high || '')}</span></div>` +
       (ex.length ? `<div class="opts extra">` + ex.map((e, i) => `<label class="opt${a === e ? ' sel' : ''}"><input class="vh" type="radio" name="${q.key}" value="${esc(e)}"${a === e ? ' checked' : ''}><span class="key" aria-hidden="true">${6 + i}</span><span>${esc(e)}</span></label>`).join('') + `</div>` : '') + `</fieldset>`;
   } else if (q.type === 'grid') {
-    const nums = q.cols.every(x => /^\d$|Not sure/.test(x));
+    const nums = q.cols.every(x => /^\d$|Not sure|I do not recall/.test(x));
     c.className = 'grid' + (nums ? ' nums' : '');
     c.style.setProperty('--cols', q.cols.length);
     const head = nums ? '' : `<div class="mx-head" aria-hidden="true"><span></span>${q.cols.map(cl => `<span>${esc(cl)}</span>`).join('')}</div>`;
