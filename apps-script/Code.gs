@@ -52,7 +52,7 @@ var COLUMNS = [
  },
  {
   "key": "q2",
-  "label": "Q2. Which industry is your organization in?",
+  "label": "Q2. Which best describes your project's main focus?",
   "width": 230
  },
  {
@@ -72,23 +72,53 @@ var COLUMNS = [
  },
  {
   "key": "q4",
-  "label": "Q4. Before this semester, how many student capstone or academic projects had you sponsored or supported?",
+  "label": "Q4. Before this semester, how many NJIT Capstone projects had you sponsored or supported?",
   "width": 230
  },
  {
   "key": "q5",
-  "label": "Q5. How many student teams are you working with this semester?",
+  "label": "Q5. How would you describe your own technical background for this project?",
   "width": 230
  },
  {
-  "key": "q6",
-  "label": "Q6. How would you describe your own technical background for this project?",
-  "width": 230
+  "key": "q6_r1",
+  "label": "Q6. Meeting with the team about weekly (30 to 60 minutes)",
+  "width": 200
+ },
+ {
+  "key": "q6_r2",
+  "label": "Q6. Giving timely feedback at sprint reviews and the midterm",
+  "width": 200
+ },
+ {
+  "key": "q6_r3",
+  "label": "Q6. Signing a scope document with the Project Manager by the end of Sprint 1",
+  "width": 200
+ },
+ {
+  "key": "q6_r4",
+  "label": "Q6. Separating must-have goals from stretch goals",
+  "width": 200
+ },
+ {
+  "key": "q6_r5",
+  "label": "Q6. Telling the Project Manager early about student concerns, instead of removing a student yourself",
+  "width": 200
+ },
+ {
+  "key": "q6_r6",
+  "label": "Q6. Attending the Industry Open House and the Final Showcase",
+  "width": 200
+ },
+ {
+  "key": "q6_r7",
+  "label": "Q6. Completing the official Sponsor Evaluation by Dec 13",
+  "width": 200
  },
  {
   "key": "q7",
-  "label": "Q7. Before the project began, how clear was it to you what the program expected from you as a sponsor?",
-  "width": 120
+  "label": "Q7. Which best describes your use of the Sponsor Partnership Guide & FAQ before the project started?",
+  "width": 230
  },
  {
   "key": "q8",
@@ -102,37 +132,42 @@ var COLUMNS = [
  },
  {
   "key": "q9_r1",
-  "label": "Q9. Clear project goals and scope",
+  "label": "Q9. Clear goals, with must-haves separated from stretch goals",
   "width": 200
  },
  {
   "key": "q9_r2",
-  "label": "Q9. Written requirements",
+  "label": "Q9. A signed scope document",
   "width": 200
  },
  {
   "key": "q9_r3",
-  "label": "Q9. Data or documents the team needed",
+  "label": "Q9. Written requirements and acceptance criteria",
   "width": 200
  },
  {
   "key": "q9_r4",
-  "label": "Q9. Accounts, tools, or system access",
+  "label": "Q9. Data, documents, or sample material",
   "width": 200
  },
  {
   "key": "q9_r5",
-  "label": "Q9. A named technical contact for the team",
+  "label": "Q9. Accounts, tools, or system access",
   "width": 200
  },
  {
   "key": "q9_r6",
-  "label": "Q9. A person who could approve decisions",
+  "label": "Q9. One named representative who can make decisions",
   "width": 200
  },
  {
   "key": "q9_r7",
-  "label": "Q9. Any required agreements (for example NDA or IP terms)",
+  "label": "Q9. A named technical contact",
+  "width": 200
+ },
+ {
+  "key": "q9_r8",
+  "label": "Q9. NDA or agreement completed by every team member",
   "width": 200
  },
  {
@@ -152,18 +187,18 @@ var COLUMNS = [
  },
  {
   "key": "q12",
-  "label": "Q12. How quickly did the team have a named day-to-day contact on your side who could answer technical questions?",
+  "label": "Q12. How soon did the team have a named day-to-day contact on your side who could answer technical questions?",
   "width": 230
  },
  {
   "key": "q13",
-  "label": "Q13. In the first month, which best describes how often you and the team communicated?",
+  "label": "Q13. During Sprints 1 to 3, how often did you hold a regular check-in with the team?",
   "width": 230
  },
  {
   "key": "q14",
-  "label": "Q14. How clear were you on how quickly to respond to the team and how to give feedback?",
-  "width": 120
+  "label": "Q14. After the semester began, did your project's scope change?",
+  "width": 230
  },
  {
   "key": "q15",
@@ -187,27 +222,27 @@ var COLUMNS = [
  },
  {
   "key": "q18_r2",
-  "label": "Q18. An intake form you fill in once",
+  "label": "Q18. A scope document template to sign with the Project Manager",
   "width": 200
  },
  {
   "key": "q18_r3",
-  "label": "Q18. A one-page agreement on check-in rhythm, response times, and feedback",
+  "label": "Q18. A week-by-week checklist for Sprint 1, up to the Oct 8 readiness package",
   "width": 200
  },
  {
   "key": "q18_r4",
-  "label": "Q18. A welcome post with the kit in your team's Discord channel",
+  "label": "Q18. A one-page summary of the Sponsor Guide",
   "width": 200
  },
  {
   "key": "q18_r5",
-  "label": "Q18. A sample timeline of the first four weeks",
+  "label": "Q18. A \"who to contact when\" card (PM first, then Capstone leadership)",
   "width": 200
  },
  {
   "key": "q18_r6",
-  "label": "Q18. A short FAQ for first-time sponsors",
+  "label": "Q18. A welcome post in your team's Discord channel",
   "width": 200
  },
  {
