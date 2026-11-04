@@ -114,6 +114,14 @@
       <button class="btn ghost" id="copy" type="button">Copy my answers</button>
     </div>
     <p class="fine" id="failHelp" hidden>Your answers are not lost: keep this tab open and try again, or copy them and send them to us.<span data-contact hidden> Contact: <a data-contact-link href="#"></a>.</span></p>
+    <section id="pkg" class="pkg" aria-labelledby="pkgH" hidden>
+      <div class="pkg-head">
+        <div><h2 id="pkgH">Your sponsor readiness package</h2>
+        <p class="pkg-sub">Built from your answers, right here in your browser. Nothing in it is sent or saved, so print it or save it as a PDF if you want to keep it.</p></div>
+        <button class="btn red" id="printPkg" type="button">Print or save as PDF</button>
+      </div>
+      <div id="pkgBody"></div>
+    </section>
     <ol class="recap-parts" id="recapParts" aria-label="What you completed" hidden></ol>
     <div class="steps" id="steps" role="group" aria-label="What happens next" hidden>
       <div class="step"><b>1</b>The Operations team reads every response.</div>
@@ -133,6 +141,7 @@
 
 <div class="hp" aria-hidden="true"><label>Leave this field empty<input id="hp" name="company_website" type="text" tabindex="-1" autocomplete="off"></label></div>
 </main>
+<script src="assets/readiness.js"></script>
 <script src="assets/app.js"></script>
 </body>
 </html>

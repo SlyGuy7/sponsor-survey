@@ -52,6 +52,14 @@ Every push runs the checks in `.github/workflows/test.yml` (Actions tab on GitHu
 
 First time: `npm install` then `npx playwright install chromium`. The real response sheet is never contacted; the tests intercept the network request.
 
+## Sponsor readiness package
+
+After a sponsor's answers are confirmed, the thank-you page shows a personalised package: one tab for the rest of this semester (fixes, dates, who to contact) and one showing the readiness kit a new sponsor would get. It is built in the sponsor's browser from their own answers; nothing extra is stored or sent, and contact details are never used.
+
+- `assets/readiness.json` holds all the wording and the rules (which answer shows which item). Each item names the sponsor-guide section it comes from. Wording edits are safe; a change to the survey's questions or answer options must go through the tests, which check every rule still matches a real answer.
+- `assets/readiness.js` is the engine and the page drawing code.
+- Dates in `readiness.json` are Fall 2026. Update them each semester; past dates hide themselves automatically.
+
 ## Results dashboard
 
 `dashboard.html` shows the team's results as charts, a heat table for the grid questions, the free-text answers (with a filter for the ones sponsors allowed us to quote) and a CSV download. It is private by key, not by hiding the page:
