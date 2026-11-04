@@ -4,7 +4,7 @@
   "private": true,
   "description": "Sponsor Experience Survey: static site plus automated tests",
   "scripts": {
-    "serve": "python3 -m http.server 4173 --bind 127.0.0.1",
+    "serve": "node serve.js 4173",
     "test": "node --test tests/appsscript.test.js tests/readiness.test.js && playwright test",
     "test:ui": "playwright test",
     "test:script": "node --test tests/appsscript.test.js tests/readiness.test.js",
