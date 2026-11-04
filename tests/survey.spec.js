@@ -53,7 +53,7 @@ test.describe('completing the survey', () => {
     expect(ctl.bodies).toHaveLength(1);
     expect(kinds.filter(k => k !== 'intro')).toHaveLength(23);   // 20 questions + 3 optional
     const payload = JSON.parse(ctl.bodies[0]);
-    expect(payload).toMatchObject({ client: 'v3', hp: '', contact_email: 'a@b.co', q10: 'Scope or goals' });
+    expect(payload).toMatchObject({ client: 'v3', hp: '', contact_email: 'a@b.co', q10: 'Scope or goals, or signing the scope document' });
     expect(payload.q11).toBeTruthy();
     expect(payload.elapsedMs).toBeGreaterThan(0);
     expect(await page.evaluate(() => localStorage.getItem('njit-sponsor-survey-v3'))).toBeNull();
@@ -122,7 +122,7 @@ test.describe('validation', () => {
     await expect(page.locator('.other-in.on input')).toBeFocused();
     await page.fill('.other-in.on input', 'Consortium');
     await page.click('#next');
-    await expect(QUESTION(page)).toContainText('industry');
+    await expect(QUESTION(page)).toContainText('main focus');
   });
 
   test('required questions cannot be skipped', async ({ page }) => {
@@ -160,14 +160,14 @@ test.describe('keyboard, history and resume', () => {
     await page.keyboard.press('ArrowLeft');
     await expect(QUESTION(page)).toContainText('organization');
     await page.keyboard.press('Enter');
-    await expect(QUESTION(page)).toContainText('industry');
+    await expect(QUESTION(page)).toContainText('main focus');
     await expect(page.locator('#qt')).toBeFocused();                      // focus moves to the new question
   });
 
   test('digit shortcuts work and Quick mode turns them off', async ({ page }) => {
     await startSurvey(page, { quick: true });
     await page.keyboard.press('3');
-    await expect(QUESTION(page)).toContainText('industry', { timeout: 3000 });   // selected and auto-advanced
+    await expect(QUESTION(page)).toContainText('main focus', { timeout: 3000 });   // selected and auto-advanced
     await page.click('#quick');
     await expect(page.locator('#quick')).toHaveAttribute('aria-pressed', 'false');
     await page.keyboard.press('2');
@@ -176,7 +176,7 @@ test.describe('keyboard, history and resume', () => {
 
   test('browser Back steps through questions instead of leaving the survey', async ({ page }) => {
     await startSurvey(page, { quick: true });
-    await page.keyboard.press('3'); await expect(QUESTION(page)).toContainText('industry', { timeout: 3000 });
+    await page.keyboard.press('3'); await expect(QUESTION(page)).toContainText('main focus', { timeout: 3000 });
     await page.goBack();
     await expect(QUESTION(page)).toContainText('organization');
     await page.waitForTimeout(400);                                        // let the screen transition finish, as a person would
@@ -186,13 +186,13 @@ test.describe('keyboard, history and resume', () => {
 
   test('a reload offers to continue, Enter resumes, and Start over needs two clicks', async ({ page }) => {
     await startSurvey(page, { quick: true });
-    await page.keyboard.press('3'); await expect(QUESTION(page)).toContainText('industry', { timeout: 3000 });
+    await page.keyboard.press('3'); await expect(QUESTION(page)).toContainText('main focus', { timeout: 3000 });
     await page.reload();
     await expect(page.locator('#resume')).toBeVisible();
     await expect(page.locator('#start')).toBeHidden();
     await page.waitForFunction(() => !document.querySelector('#resume').disabled);
     await page.keyboard.press('Enter');
-    await expect(QUESTION(page)).toContainText('industry');             // resumed, not wiped
+    await expect(QUESTION(page)).toContainText('main focus');             // resumed, not wiped
     await page.reload();
     await page.click('#restart');
     await expect(page.locator('#q')).not.toHaveClass(/on/);               // first click only arms it

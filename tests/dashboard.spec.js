@@ -85,10 +85,10 @@ test.describe('with results', () => {
     const q1 = page.locator('.q-card', { hasText: 'Which best describes your organization?' });
     await expect(q1.locator('.bars li').first()).toContainText('Large company');
     await expect(q1.locator('.val').first()).toContainText('%');
-    await expect(page.locator('.q-card', { hasText: 'how clear was it to you what the program expected' })).toContainText('Average:');
+    await expect(page.locator('.q-card', { hasText: 'how satisfied are you with how the project got started' })).toContainText('Average:');
     const grid = page.locator('.q-card', { hasText: 'how ready was each of the following' });
     await expect(grid.locator('table.heat')).toBeVisible();
-    await expect(grid.locator('tbody tr')).toHaveCount(7);
+    await expect(grid.locator('tbody tr')).toHaveCount(8);
     await expect(page.locator('.answers').first()).toContainText('Answer number');
     expect(problems).toEqual([]);
   });

@@ -17,7 +17,7 @@ test('each part has its own colour, icon and a banner on its first question only
   await expect(page.locator('#partIcon svg')).toHaveCount(1);
   const colourA = await page.evaluate(() => getComputedStyle(document.querySelector('.rail')).backgroundColor);
   await answerCurrent(page); await page.waitForTimeout(150); await page.click('#next');
-  await expect(page.locator('.qtext')).toContainText('industry');
+  await expect(page.locator('.qtext')).toContainText('main focus');
   await expect(page.locator('.part-banner')).toHaveCount(0);          // second question of part A: no banner
   // walk to the first question of part B
   for (let i = 0; i < 12 && (await page.locator('#q').getAttribute('data-part')) !== 'B'; i++) {
@@ -55,7 +55,7 @@ test.describe('thank-you page', () => {
     await answerAll(page, { pick: 1, email: 'recap@example.com', text: 'Nothing to add' });
     await expect(page.locator('#doneH')).toContainText('Thank');
     await expect(page.locator('#recapParts li')).toHaveCount(6);
-    await expect(page.locator('#recapParts li').first()).toContainText('6 of 6');
+    await expect(page.locator('#recapParts li').first()).toContainText('5 of 5');
     await expect(page.locator('#afterRow')).toBeVisible();
 
     await page.click('#share');

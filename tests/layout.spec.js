@@ -30,17 +30,17 @@ test('text scales with the browser default font size (sizes are rem, not px)', a
   expect(px).toEqual([]);
 });
 
-async function reachGrid(page) {
+async function reachGrid(page, sel = '#ctl .row') {
   await mockEndpoint(page);
   await startSurvey(page);
-  for (let i = 0; i < 40 && !(await page.locator('#ctl .row').count()); i++) {
+  for (let i = 0; i < 40 && !(await page.locator(sel).count()); i++) {
     await require('./helpers').answerCurrent(page); await page.waitForTimeout(120); await page.click('#next'); await page.waitForTimeout(250);
   }
 }
 
 test('desktop grids are a matrix: one header row, answers on the same line as the label', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
-  await reachGrid(page);
+  await reachGrid(page, '.mx-head');
   await expect(page.locator('.mx-head')).toBeVisible();
   expect(await page.locator('.mx-head span').count()).toBe(6);            // label column + 5 answers
   const m = await page.evaluate(() => {
