@@ -354,7 +354,25 @@ function renderRecap() {
   $('#mineBody').innerHTML = '<dl>' + recap.items.map(i => `<dt>${esc(i.title)}</dt><dd>${esc(i.body).replace(/\n/g, '<br>')}</dd>`).join('') + '</dl>';
   $('#recapParts').hidden = false; $('#mine').hidden = false; $('#afterRow').hidden = false;
 }
+/* ---------- personalised readiness package (built in the browser; nothing is stored or sent) ---------- */
+let READINESS = null;
+async function showPackage(data) {
+  try {
+    if (!READINESS) { const r = await fetch('assets/readiness.json'); if (!r.ok) throw new Error(r.status); READINESS = await r.json(); }
+    Readiness.mount(READINESS, data, $('#pkgBody'));
+    $('#pkg').hidden = false;
+  } catch (e) { $('#pkg').hidden = true; }
+}
+$('#printPkg').addEventListener('click', () => {
+  const closed = [...document.querySelectorAll('#pkg details:not([open])')];
+  closed.forEach(d => { d.open = true; });
+  document.body.classList.add('print-pkg');
+  const undo = () => { document.body.classList.remove('print-pkg'); closed.forEach(d => { d.open = false; }); removeEventListener('afterprint', undo); };
+  addEventListener('afterprint', undo);
+  window.print();
+});
 function onSuccess() {
+  showPackage(lastPayload);
   renderRecap();
   wipe(); lastPayload = null; ans = {};
   $('#doneH').innerHTML = 'Thank <em>you.</em>';
@@ -373,7 +391,7 @@ function finish() {
   lastPayload = payload(); show(done); stage.innerHTML = '';
   document.title = 'Sending – Sponsor Experience Survey';
   $('#doneH').textContent = 'Sending…'; $('#steps').hidden = true; $('#closeTab').hidden = true;
-  ['#recapParts', '#mine', '#afterRow'].forEach(s => { $(s).hidden = true; });
+  ['#recapParts', '#mine', '#afterRow', '#pkg'].forEach(s => { $(s).hidden = true; });
   $('#doneH').focus({ preventScroll: true });
   send();
 }
