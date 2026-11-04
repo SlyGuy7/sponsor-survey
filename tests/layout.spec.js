@@ -57,6 +57,58 @@ test('desktop grids are a matrix: one header row, answers on the same line as th
   await expect(page.locator('#ctl .row').first()).toHaveClass(/done/);
 });
 
+test('a missed grid row is marked and brought into view', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await reachGrid(page);
+  const rows = page.locator('#ctl .row');
+  const total = await rows.count();
+  await rows.nth(0).locator('.pill').first().click();
+  await rows.nth(total - 1).scrollIntoViewIfNeeded();
+  await page.click('#next');
+  await expect(page.locator('#err')).toHaveText((total - 1) + ' rows still need an answer.');
+  await expect(page.locator('#ctl .row.missing')).toHaveCount(total - 1);
+  await expect(rows.nth(0)).not.toHaveClass(/missing/);
+  await expect(rows.nth(1)).toHaveClass(/missing/);
+  expect(await rows.nth(1).locator('.rl span').evaluate(s => getComputedStyle(s, '::after').content)).toBe('"Needs an answer"');
+  await expect(rows.nth(1)).toBeInViewport();
+  await expect(rows.nth(1).locator('input').first()).toBeFocused();
+  // the marks and the count clear as rows are answered, and the survey can then continue
+  await rows.nth(1).locator('.pill').first().click();
+  await expect(rows.nth(1)).not.toHaveClass(/missing/);
+  for (let i = 2; i < total - 1; i++) await rows.nth(i).locator('.pill').first().click();
+  await expect(page.locator('#err')).toHaveText('1 row still needs an answer.');
+  await rows.nth(total - 1).locator('.pill').first().click();
+  await expect(page.locator('#err')).toHaveText('');
+  const before = await page.locator('.qtext').textContent();
+  await page.click('#next');
+  await expect(page.locator('.qtext')).not.toHaveText(before);
+});
+
+test.describe('touch screens', () => {
+  test.use({ hasTouch: true, isMobile: true, viewport: { width: 320, height: 568 } });
+
+  test('keyboard hints are hidden, answers stay easy to tap and selection still shows', async ({ page }) => {
+    await disableQuick(page);
+    await mockEndpoint(page);
+    await page.goto('/index.html');
+    await page.waitForFunction(() => !document.querySelector('#start').disabled);
+    await expect(page.locator('#start .kbd')).toBeHidden();
+    await page.tap('#start');
+    await page.waitForSelector('.opt');
+    await expect(page.locator('#hint')).toHaveText('');
+    const opt = page.locator('#ctl .opt').first();
+    const key = opt.locator('.key');
+    expect(await key.evaluate(k => getComputedStyle(k).fontSize)).toBe('0px');
+    expect((await opt.boundingBox()).height).toBeGreaterThanOrEqual(44);
+    const before = await key.evaluate(k => getComputedStyle(k).backgroundImage);
+    await opt.tap();
+    await expect(opt).toHaveClass(/sel/);
+    expect(await key.evaluate(k => getComputedStyle(k).backgroundImage)).not.toBe(before);
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
+    expect(overflow).toBe(false);
+  });
+});
+
 test('phone grids stay as rows of labelled answers beneath each question', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await reachGrid(page);

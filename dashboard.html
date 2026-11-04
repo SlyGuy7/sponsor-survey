@@ -21,6 +21,7 @@
     <div class="top-actions">
       <button id="refresh" class="btn" type="button" hidden>Refresh</button>
       <button id="csv" class="btn" type="button" hidden>Download CSV</button>
+      <button id="forget" class="btn" type="button" hidden>Forget this device</button>
     </div>
   </div>
 </header>
@@ -28,16 +29,24 @@
   <noscript><p class="note">This page needs JavaScript.</p></noscript>
   <section id="gate" class="card gate" aria-labelledby="gateH">
     <h2 id="gateH">Enter the results key</h2>
-    <p>The key is created in Apps Script by running <code>createDashboardKey</code>. Only share it with the Operations team and the professor. It is never stored in the website.</p>
+    <p>The key is created in Apps Script by running <code>createDashboardKey</code>. Only share it with the Operations team and the professor.</p>
     <form id="gateForm" autocomplete="off">
       <label for="keyIn">Results key</label>
       <input id="keyIn" type="password" autocomplete="one-time-code" spellcheck="false" required>
+      <label class="remember" for="rememberKey"><input id="rememberKey" type="checkbox">Remember on this device</label>
+      <p class="remember-note">You will not be asked again in this browser. Leave this off on a shared computer.</p>
       <button class="btn primary" type="submit">Show results</button>
     </form>
   </section>
   <p id="msg" class="msg" role="status" aria-live="polite" hidden></p>
   <div id="out" hidden>
     <section id="tiles" class="tiles" aria-label="Summary"></section>
+    <section id="glance" class="glance" aria-labelledby="glanceH" hidden>
+      <h2 id="glanceH">At a glance</h2>
+      <p id="glanceNote" class="note"></p>
+      <div id="glanceCards" class="cards"></div>
+    </section>
+    <nav id="jump" class="jump" aria-label="Jump to a part of the survey" hidden></nav>
     <div id="parts"></div>
   </div>
 </main>

@@ -12,7 +12,16 @@ const el = (tag, attrs, ...kids) => {
   return e;
 };
 
-let SURVEY = null, EP = '', KEY = '', ROWS = [];
+let SURVEY = null, EP = '', KEY = '', ROWS = [], REMEMBER = false;
+
+// The key is only kept in this browser if the person ticks "Remember on this device", and only once the server accepts it.
+const STORE = 'njit-sponsor-survey-dashboard-key';
+const saved = {
+  get() { try { return localStorage.getItem(STORE) || ''; } catch (e) { return ''; } },
+  set(k) { try { localStorage.setItem(STORE, k); } catch (e) { /* private window: simply not remembered */ } },
+  clear() { try { localStorage.removeItem(STORE); } catch (e) { /* nothing to clear */ } },
+};
+const syncForget = () => { $('#forget').hidden = !saved.get(); };
 
 const keyOf = q => q.n ? 'q' + q.n : (q.bonus === 1 ? 'contact' : q.bonus === 2 ? 'quote_ok' : 'results_ok');
 const has = v => v !== undefined && v !== null && String(v).trim() !== '';
@@ -24,7 +33,14 @@ function msg(text, bad) {
 }
 
 /* ---------- data ---------- */
+function clearResults() {
+  ROWS = [];
+  ['#tiles', '#glanceCards', '#jump', '#parts'].forEach(s => $(s).replaceChildren());
+  ['#out', '#glance', '#jump', '#refresh', '#csv'].forEach(s => { $(s).hidden = true; });
+  $('#updated').textContent = 'Private page for the Operations team';
+}
 async function load() {
+  const key = KEY;
   msg('Loading results…');
   try {
     if (!SURVEY) { const r = await fetch('assets/survey.json', { cache: 'no-cache' }); SURVEY = await r.json(); SURVEY.questions.forEach(q => { q.key = keyOf(q); }); }
@@ -33,17 +49,26 @@ async function load() {
       const m = t.match(/const ENDPOINT = '([^']+)'/); if (!m) throw new Error('endpoint');
       EP = m[1];
     }
-    const res = await fetch(EP + '?action=summary&key=' + encodeURIComponent(KEY));
+    const res = await fetch(EP + '?action=summary&key=' + encodeURIComponent(key));
     const out = await res.json();
+    if (key !== KEY) return;                              // "Forget this device" was pressed while this was loading
     if (!out || out.ok !== true) {
-      if (out && out.error === 'not allowed') { KEY = ''; $('#gate').hidden = false; $('#out').hidden = true; msg('That key was not accepted. Run createDashboardKey in Apps Script again and paste the new key.', true); return; }
+      if (out && out.error === 'not allowed') {
+        if (saved.get() === key) saved.clear();           // a replaced key should not be tried again
+        KEY = ''; REMEMBER = false; clearResults(); syncForget(); $('#gate').hidden = false;
+        msg('That key was not accepted. Run createDashboardKey in Apps Script again and paste the new key.', true);
+        return;
+      }
       throw new Error((out && out.error) || 'failed');
     }
+    if (REMEMBER) { saved.set(key); REMEMBER = false; $('#rememberKey').checked = false; }
     ROWS = out.rows || [];
-    $('#gate').hidden = true; msg('');
+    $('#gate').hidden = true; msg(''); syncForget();
     render();
   } catch (e) {
+    if (key !== KEY) return;
     msg('Could not load the results. Check your connection and try again.', true);
+    if (key && saved.get() === key) $('#refresh').hidden = false;   // the key form is hidden in this case, so offer a way to retry
   }
 }
 
@@ -120,6 +145,48 @@ function textCard(q) {
   return card(q, [el('label', { class: 'filter', for: 'f' + q.key }, box, 'Only answers we may quote'), scroller], plural(items.length, 'answer'));
 }
 
+/* ---------- at a glance: the same answers, ranked so the findings stand out ---------- */
+const byNumber = n => SURVEY.questions.find(q => q.n === n);
+// Ranks a grid question's rows by how many people gave one of the `hit` answers, leaving out answers in `skip`.
+function rankRows(q, hit, skip) {
+  return q.rows.map((label, i) => {
+    const vals = ROWS.map(r => r[q.key + '_r' + (i + 1)]).filter(has).map(String).filter(v => !skip.includes(v));
+    return { label, n: vals.filter(v => hit.includes(v)).length, of: vals.length };
+  }).filter(x => x.of > 0).sort((a, b) => pct(b.n, b.of) - pct(a.n, a.of) || b.n - a.n).slice(0, 5);
+}
+function rankList(items) {
+  return el('ol', { class: 'bars' }, items.map(x => {
+    const bar = el('span', { class: 'bar', 'aria-hidden': 'true' }, el('i'));
+    bar.firstChild.style.setProperty('--w', pct(x.n, x.of) + '%');
+    return el('li', {}, el('span', { text: x.label }), bar, el('span', { class: 'val', text: x.n + ' of ' + x.of + ' · ' + pct(x.n, x.of) + '%' }));
+  }));
+}
+function glanceCard(title, meta, items, extra) {
+  if (!items.length) return null;
+  return el('article', { class: 'card q-card' }, el('h3', { text: title }), el('p', { class: 'meta', text: meta }), rankList(items), extra || null);
+}
+// The most common answer to question 10, leaving out "Nothing was delayed" (the option that skips ahead).
+function topWait() {
+  const q = byNumber(10); if (!q) return null;
+  const none = q.options.filter(o => o.skipTo).map(o => o.label);
+  const counts = tally(ROWS.map(r => r.q10).filter(has).map(String).filter(v => !none.includes(v)), []);
+  const max = Math.max(0, ...counts.map(c => c[1]));
+  if (!max) return null;
+  return el('p', { class: 'avg', text: 'Most common longest wait: ' + counts.filter(c => c[1] === max).map(c => c[0]).join(' / ') + ' (' + plural(max, 'sponsor') + ')' });
+}
+function renderGlance() {
+  const n = ROWS.length;
+  const q9 = byNumber(9), q6 = byNumber(6), q18 = byNumber(18);
+  const cards = [
+    q9 && glanceCard('Where readiness slipped', 'Ready after Oct 8 or still not ready. “Not needed” is left out.', rankRows(q9, ['Ready after Oct 8', 'Still not ready'], ['Not needed for our project']), topWait()),
+    q6 && glanceCard('Least clear expectations', 'Rated 1 or 2, or “I do not recall”.', rankRows(q6, ['1', '2', 'I do not recall'], [])),
+    q18 && glanceCard('Most wanted in the kit', 'Rated 4 or 5. “Not sure” is left out.', rankRows(q18, ['4', '5'], ['Not sure'])),
+  ].filter(Boolean);
+  $('#glanceCards').replaceChildren(...cards);
+  $('#glanceNote').textContent = n < 5 ? 'Only ' + plural(n, 'response') + ' so far, so treat these as early signals. Top five in each list.' : 'Top five in each list, highest share first.';
+  $('#glance').hidden = !cards.length;
+}
+
 function tile(n, l, extra) { return el('div', { class: 'tile' }, el('div', { class: 'n', text: n }), el('div', { class: 'l', text: l }), extra); }
 function sparkline() {
   const byDay = new Map();
@@ -127,7 +194,7 @@ function sparkline() {
   const pts = [...byDay.entries()].sort((a, b) => new Date(a[0]) - new Date(b[0])).map(e => e[1]);
   if (pts.length < 2) return null;
   const max = Math.max(...pts), w = 160, h = 36;
-  const svg = document.createElementNS(SVGNS, 'svg'); svg.setAttribute('viewBox', `0 0 ${w} ${h}`); svg.setAttribute('role', 'img'); svg.setAttribute('aria-label', 'Responses per day: ' + pts.join(', '));
+  const svg = document.createElementNS(SVGNS, 'svg'); svg.setAttribute('viewBox', `0 0 ${w} ${h}`); svg.setAttribute('preserveAspectRatio', 'none'); svg.setAttribute('role', 'img'); svg.setAttribute('aria-label', 'Responses per day: ' + pts.join(', '));
   const line = document.createElementNS(SVGNS, 'polyline');
   line.setAttribute('points', pts.map((v, i) => `${(i / (pts.length - 1)) * w},${h - 4 - (v / max) * (h - 8)}`).join(' '));
   svg.append(line); return svg;
@@ -141,14 +208,20 @@ function render() {
   const median = secs.length ? secs[Math.floor(secs.length / 2)] : 0;
   const want = ROWS.filter(r => r.results_ok === 'Yes').length, ok = ROWS.filter(r => r.quote_ok === 'Yes').length;
   const latest = ROWS.map(r => r.receivedAt).filter(has).sort().pop();
+  const sat = ROWS.map(r => Number(r.q16)).filter(x => x >= 1 && x <= 5);
   const tiles = $('#tiles'); tiles.replaceChildren(
     tile(String(n), 'Responses', sparkline()),
+    tile(sat.length ? (sat.reduce((a, b) => a + b, 0) / sat.length).toFixed(1) + ' / 5' : '–', 'Satisfaction with how the project started'),
     tile(median ? (median / 60).toFixed(1) + ' min' : '–', 'Median time to finish'),
     tile(latest ? new Date(latest).toLocaleDateString([], { month: 'short', day: 'numeric' }) : '–', 'Latest response'),
     tile(pct(want, n) + '%', 'Want a summary of the results (' + want + ')'),
     tile(pct(ok, n) + '%', 'Said we may quote them (' + ok + ')'));
   const parts = $('#parts'); parts.replaceChildren();
+  $('#glance').hidden = true; $('#jump').hidden = true;
   if (!n) { parts.append(el('p', { class: 'msg', text: 'No responses yet. This page fills in as sponsors finish the survey.' })); return; }
+  renderGlance();
+  $('#jump').replaceChildren(...SURVEY.parts.filter(p => SURVEY.questions.some(q => q.part === p.id && q.type !== 'contact')).map(p => el('a', { href: '#p' + p.id, text: p.label })));
+  $('#jump').hidden = false;
   SURVEY.parts.forEach(p => {
     const qs = SURVEY.questions.filter(q => q.part === p.id && q.type !== 'contact');
     if (!qs.length) return;
@@ -175,9 +248,17 @@ function downloadCsv() {
 }
 
 /* ---------- start ---------- */
-$('#gateForm').addEventListener('submit', e => { e.preventDefault(); KEY = $('#keyIn').value.trim(); $('#keyIn').value = ''; if (KEY) load(); });
+$('#gateForm').addEventListener('submit', e => { e.preventDefault(); KEY = $('#keyIn').value.trim(); $('#keyIn').value = ''; REMEMBER = $('#rememberKey').checked; if (KEY) load(); });
 $('#refresh').addEventListener('click', load);
 $('#csv').addEventListener('click', downloadCsv);
+$('#forget').addEventListener('click', () => {
+  saved.clear(); KEY = ''; REMEMBER = false;
+  clearResults(); syncForget(); $('#gate').hidden = false;
+  msg('This device has forgotten the key.');
+  $('#keyIn').focus();
+});
+syncForget();
 const m = location.hash.match(/key=([^&]+)/);
 if (m) { KEY = decodeURIComponent(m[1]); history.replaceState(null, '', location.pathname); load(); }
+else if (saved.get()) { KEY = saved.get(); $('#gate').hidden = true; load(); }
 })();

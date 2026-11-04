@@ -13,7 +13,7 @@
 <link rel="canonical" href="https://slyguy7.github.io/sponsor-survey/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Sponsor Experience Survey">
-<meta property="og:description" content="Help us help the next sponsor. 20 questions, mostly taps.">
+<meta property="og:description" content="Help us help the next sponsor. 20 questions, mostly taps, and a readiness package built from your answers.">
 <meta property="og:url" content="https://slyguy7.github.io/sponsor-survey/">
 <meta property="og:image" content="https://slyguy7.github.io/sponsor-survey/assets/og.png">
 <meta property="og:image:width" content="1200">
@@ -32,14 +32,12 @@
 
 <!-- WELCOME -->
 <section id="welcome" class="screen hero on" aria-label="Welcome">
-  <div class="slash"></div><div class="slash two"></div>
   <div class="hero-in">
     <div class="brand"><span class="logo-pill"><img src="assets/njit-logo.png" width="184" height="77" alt="New Jersey Institute of Technology"></span><span class="tag">Capstone &middot; Fall 2026</span></div>
     <div class="hero-grid">
-      <svg class="bignum" viewBox="0 0 560 360" aria-hidden="true" focusable="false"><text x="0" y="335" font-size="430">20</text></svg>
       <div class="hero-main">
         <h1>Help us help the <em>next</em> sponsor.</h1>
-        <p class="lede">You have seen how a capstone project starts from the sponsor's side. Tell us what it was like, so the next sponsor starts ready.</p>
+        <p class="lede">You have seen how a capstone project starts from the sponsor's side. Tell us what it was like, and leave with a readiness package built around your answers.</p>
         <div class="cta-row">
           <button id="start" class="btn primary" type="button" disabled>Start the survey <span class="kbd" aria-hidden="true">Enter</span></button>
           <button id="resume" class="btn primary" type="button" hidden>Continue where I left off <span class="kbd" aria-hidden="true">Enter</span></button>
@@ -57,18 +55,38 @@
           <li><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9h18v11H3zM8 9V6h8v3M3 14h18"/></svg><b>E</b><span>Readiness kit</span></li>
         </ol>
       </div>
-      <section class="panel" aria-label="About this survey">
-        <div class="team">
-          <h2>Created by the Operations Team</h2>
-          <ul>
-            <li><i aria-hidden="true">EA</i>Eugene Amparbeng</li>
-            <li><i aria-hidden="true">MT</i>Mariah Torres</li>
-            <li><i aria-hidden="true">GH</i>Gerard Herrera</li>
-            <li><i aria-hidden="true">SV</i>Steven Vernikov</li>
+      <div class="side">
+        <section class="gift" aria-labelledby="giftH">
+          <h2 id="giftH">What you get for your time</h2>
+          <p class="gift-sub">A readiness package built from your own answers and the Capstone Sponsor Guide.</p>
+          <ul class="gift-list">
+            <li><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span><b>What needs attention now</b>Any gaps your answers point to, with practical next steps.</span></li>
+            <li><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span><b>The dates still ahead</b>The milestones left this semester, through the Sponsor Evaluation.</span></li>
+            <li><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span><b>Who to contact, and when</b>Your PM first, then Capstone leadership.</span></li>
+            <li><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span><b>A new-sponsor kit</b>Checklists and a scope template, ordered by what you rate most useful.</span></li>
           </ul>
-        </div>
-        <p class="fine privacy"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3z"/></svg><span>This survey is separate from the official Sponsor Evaluation. Anonymous unless you choose to leave contact details at the end. Answers go to a private Google Sheet that only the Operations team and the course professor can open. We will not quote you without permission, and results are shared as summaries. We keep your answers only as long as this project needs them.<span data-contact hidden> Questions or a request to delete your answers: <a data-contact-link href="#"></a>.</span></span></p>
-      </section>
+          <p class="gift-foot">Appears as soon as your answers are in. Print it or save it as a PDF.</p>
+        </section>
+        <section class="panel" aria-labelledby="trustH">
+          <h2 id="trustH">Your privacy</h2>
+          <ul class="trust">
+            <li>This survey is separate from the official Sponsor Evaluation.</li>
+            <li>Anonymous unless you choose to leave contact details at the end.</li>
+            <li>Answers go to a private Google Sheet that only the Operations team and the course professor can open.</li>
+            <li>We will not quote you without permission, and results are shared as summaries.</li>
+            <li>We keep your answers only as long as this project needs them.<span data-contact hidden> Questions or a request to delete your answers: <a data-contact-link href="#"></a>.</span></li>
+          </ul>
+          <div class="team">
+            <h2>Created by the Operations Team</h2>
+            <ul>
+              <li>Eugene Amparbeng</li>
+              <li>Mariah Torres</li>
+              <li>Gerard Herrera</li>
+              <li>Steven Vernikov</li>
+            </ul>
+          </div>
+        </section>
+      </div>
     </div>
     <footer class="site-foot"><span><b>&copy; 2026 Operations Team</b> &middot; Capstone, Fall 2026</span><span>Your answers are used only to improve the sponsor experience.</span></footer>
   </div>
@@ -82,7 +100,7 @@
       <div class="part-head"><span class="part-ic" id="partIcon" aria-hidden="true"></span><div><div class="part-name" id="partName"></div><div class="part-title" id="partTitle"></div></div></div>
     </div>
     <div class="bignum" id="bignum" aria-hidden="true">01</div>
-    <div class="rail-end"><div class="rail-bot"><i></i><span id="railCount"></span></div><div class="rail-copy">&copy; 2026 Operations Team</div></div>
+    <div class="rail-end"><div class="rail-bot"><i></i><span id="railCount"></span></div><p class="rail-note">Your personal readiness package appears when you finish.</p><div class="rail-copy">&copy; 2026 Operations Team</div></div>
   </div>
   <div class="pane">
     <div class="prog" id="prog" aria-hidden="true"></div>
@@ -93,7 +111,7 @@
       <button class="back" id="back" type="button">&larr; Back</button>
       <div class="nav-mid">
         <span class="hint" id="hint"></span>
-        <button class="toggle" id="quick" type="button" aria-pressed="true">Quick mode: on</button>
+        <button class="toggle" id="quick" type="button" aria-pressed="true" title="Moves to the next question after you tap an answer">Auto-advance: on</button>
       </div>
       <button class="btn red" id="next" type="button">Next &rarr;</button>
     </div>
@@ -102,8 +120,6 @@
 
 <!-- DONE -->
 <section id="done" class="screen hero" aria-label="Thank you">
-  <canvas id="fx" aria-hidden="true"></canvas>
-  <div class="slash"></div><div class="slash two"></div>
   <div class="hero-in done-in">
     <div class="brand"><span class="logo-pill"><img src="assets/njit-logo.png" width="184" height="77" alt="New Jersey Institute of Technology"></span></div>
     <h1 id="doneH" tabindex="-1">Sending&hellip;</h1>

@@ -52,7 +52,7 @@ async function answerAll(page, opts = {}) {
   return seen;
 }
 
-// Quick mode (auto-advance after a tap) is switched off for tests that click "Next" themselves, so they cannot race the timer.
+// Auto-advance (moving on after a tap) is switched off for tests that click "Next" themselves, so they cannot race the timer.
 const disableQuick = page => page.addInitScript(() => localStorage.setItem('njit-sponsor-survey-prefs', 'off'));
 
 // Opens the survey and lands on question 1.

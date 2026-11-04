@@ -72,6 +72,143 @@ test('a server error is reported, not shown as empty results', async ({ page }) 
   await expect(page.locator('#tiles .tile')).toHaveCount(0);
 });
 
+test.describe('remembering the key', () => {
+  const stored = page => page.evaluate(() => localStorage.getItem('njit-sponsor-survey-dashboard-key'));
+  const enter = async (page, key, remember) => {
+    await page.fill('#keyIn', key);
+    if (remember) await page.check('#rememberKey');
+    await page.click('#gateForm button');
+  };
+
+  test('with the box ticked, the next visit opens straight to the results', async ({ page }) => {
+    const seen = await mock(page, OK(fixture()));
+    await page.goto('/dashboard.html');
+    await enter(page, 'keep-me', true);
+    await expect(page.locator('#out')).toBeVisible();
+    expect(await stored(page)).toBe('keep-me');
+    await page.reload();
+    await expect(page.locator('#out')).toBeVisible();
+    await expect(page.locator('#gate')).toBeHidden();
+    expect(seen).toHaveLength(2);
+    expect(seen[1]).toContain('key=keep-me');
+    await expect(page.locator('#forget')).toBeVisible();
+  });
+
+  test('without the box ticked, nothing is kept and the next visit asks again', async ({ page }) => {
+    await mock(page, OK(fixture()));
+    await page.goto('/dashboard.html');
+    await enter(page, 'not-kept', false);
+    await expect(page.locator('#out')).toBeVisible();
+    expect(await stored(page)).toBeNull();
+    await expect(page.locator('#forget')).toBeHidden();
+    await page.reload();
+    await expect(page.locator('#gate')).toBeVisible();
+    await expect(page.locator('#out')).toBeHidden();
+  });
+
+  test('a key in the link is not kept', async ({ page }) => {
+    await mock(page, OK(fixture()));
+    await page.goto('/dashboard.html#key=from-link');
+    await expect(page.locator('#out')).toBeVisible();
+    expect(await stored(page)).toBeNull();
+  });
+
+  test('a rejected key is never kept, even with the box ticked', async ({ page }) => {
+    await mock(page, { ok: false, error: 'not allowed' });
+    await page.goto('/dashboard.html');
+    await enter(page, 'wrong', true);
+    await expect(page.locator('#msg')).toContainText('not accepted');
+    expect(await stored(page)).toBeNull();
+  });
+
+  test('a remembered key that was replaced is removed and the form comes back', async ({ page }) => {
+    let reply = OK(fixture());
+    await mock(page, () => reply);
+    await page.goto('/dashboard.html');
+    await enter(page, 'old-key', true);
+    await expect(page.locator('#out')).toBeVisible();
+    reply = { ok: false, error: 'not allowed' };
+    await page.reload();
+    await expect(page.locator('#msg')).toContainText('not accepted');
+    await expect(page.locator('#gate')).toBeVisible();
+    await expect(page.locator('#forget')).toBeHidden();
+    expect(await stored(page)).toBeNull();
+  });
+
+  test('a temporary failure keeps the remembered key and offers a retry', async ({ page }) => {
+    let reply = OK(fixture());
+    await mock(page, () => reply);
+    await page.goto('/dashboard.html');
+    await enter(page, 'keep-me', true);
+    await expect(page.locator('#out')).toBeVisible();
+    reply = { ok: false, error: 'server error' };
+    await page.reload();
+    await expect(page.locator('#msg')).toContainText('Could not load');
+    expect(await stored(page)).toBe('keep-me');
+    await expect(page.locator('#gate')).toBeHidden();
+    reply = OK(fixture());
+    await page.click('#refresh');
+    await expect(page.locator('#out')).toBeVisible();
+    await expect(page.locator('#msg')).toBeHidden();
+  });
+
+  test('Forget this device removes the key and the results from the screen', async ({ page }) => {
+    await mock(page, OK(fixture()));
+    await page.goto('/dashboard.html');
+    await enter(page, 'keep-me', true);
+    await expect(page.locator('#out')).toBeVisible();
+    await page.click('#forget');
+    expect(await stored(page)).toBeNull();
+    await expect(page.locator('#gate')).toBeVisible();
+    await expect(page.locator('#out')).toBeHidden();
+    await expect(page.locator('#tiles .tile')).toHaveCount(0);
+    await expect(page.locator('.part')).toHaveCount(0);
+    await expect(page.locator('#csv')).toBeHidden();
+    await page.reload();
+    await expect(page.locator('#gate')).toBeVisible();
+  });
+});
+
+test.describe('at a glance', () => {
+  const row = over => ({ receivedAt: '2026-10-21T15:00:00.000Z', seconds: 300, ...over });
+  const NOT_NEEDED = 'Not needed for our project';
+
+  test('ranks the biggest gaps, and leaves out answers that do not count', async ({ page }) => {
+    const rows = [
+      row({ q9_r1: 'Still not ready', q9_r2: 'Ready after Oct 8', q10: 'Data or documents', q16: 2 }),
+      row({ q9_r1: 'Ready after Oct 8', q9_r2: 'Ready before Sprint 1 (by Sept 28)', q10: 'Data or documents', q16: 4 }),
+      row({ q9_r1: NOT_NEEDED, q9_r2: 'Ready before Sprint 1 (by Sept 28)', q10: 'Nothing was delayed', q16: 3 }),
+    ];
+    await mock(page, OK(rows));
+    await page.goto('/dashboard.html#key=k');
+    const card = page.locator('#glanceCards .q-card', { hasText: 'Where readiness slipped' });
+    const first = card.locator('.bars li').first();
+    await expect(first).toContainText('Clear goals');
+    await expect(first).toContainText('2 of 2');              // the "Not needed" answer is not counted
+    await expect(first).toContainText('100%');
+    await expect(card.locator('.bars li').nth(1)).toContainText('1 of 3');
+    await expect(card).toContainText('Most common longest wait: Data or documents (2 sponsors)');
+    await expect(card).not.toContainText('Nothing was delayed');
+    await expect(page.locator('#tiles')).toContainText('3.0 / 5');
+    await expect(page.locator('#glanceNote')).toContainText('Only 3 responses');
+  });
+
+  test('stays away when there are no responses, and links to each part', async ({ page }) => {
+    await mock(page, OK([]));
+    await page.goto('/dashboard.html#key=k');
+    await expect(page.locator('#parts')).toContainText('No responses yet');
+    await expect(page.locator('#glance')).toBeHidden();
+    await expect(page.locator('#jump')).toBeHidden();
+    await page.unroute('https://script.google.com/**');
+    await mock(page, OK(fixture(12)));
+    await page.click('#refresh');
+    await expect(page.locator('#glance')).toBeVisible();
+    await expect(page.locator('#jump a')).toHaveCount(6);
+    await page.locator('#jump a', { hasText: 'Part C' }).click();
+    await expect(page.locator('#pC')).toBeInViewport();
+  });
+});
+
 test.describe('with results', () => {
   test('summary tiles and a chart for every question type', async ({ page }) => {
     const problems = [];
