@@ -102,6 +102,7 @@ function nextLabel(q) {
   return isLast() ? 'Submit &check;' : (q && q.optional && !qAnswered(q) ? 'Skip &rarr;' : 'Next &rarr;');
 }
 function hintFor(q) {
+  if (coarse()) return '';
   if (q.type === 'text') return 'Ctrl + Enter to continue';
   if (!quick) return 'Enter to continue';
   if (q.type === 'single' || q.type === 'multi') return `Keys 1–${Math.min(9, q.options.length)} choose, Enter continues`;
@@ -213,7 +214,8 @@ function pickScale(q, v) {
 function pickCell(q, ri, ci) {
   const cur = { ...(ans[q.key] || {}) }; cur[ri] = q.cols[ci]; ans[q.key] = cur; save();
   const row = $(`#ctl .row[data-r="${ri}"]`);
-  row.classList.add('done'); row.querySelectorAll('.pill').forEach((p, i) => p.classList.toggle('sel', i === ci));
+  row.classList.add('done'); row.classList.remove('missing'); row.querySelectorAll('.pill').forEach((p, i) => p.classList.toggle('sel', i === ci));
+  if ($('#err').textContent) $('#err').textContent = rowsLeftText(q);
   progress();
   const nx = row.nextElementSibling; if (nx && !nx.classList.contains('done')) nx.scrollIntoView({ block: 'nearest', behavior: reduced() ? 'auto' : 'smooth' });
 }
@@ -243,6 +245,19 @@ function fail(msg, focusEl) {
   if (focusEl) focusEl.focus();
   return false;
 }
+const rowsLeft = q => q.rows.filter((_, i) => !ans[q.key] || ans[q.key][i] === undefined).length;
+function rowsLeftText(q) {
+  const left = rowsLeft(q);
+  return left ? left + (left > 1 ? ' rows still need' : ' row still needs') + ' an answer.' : '';
+}
+// The error text sits below the grid, often off screen, so mark the rows and bring the first one into view.
+function showMissingRows(q) {
+  const a = ans[q.key];
+  const missing = $$('#ctl .row').filter((row, i) => { const miss = !a || a[i] === undefined; row.classList.toggle('missing', miss); return miss; });
+  if (!missing.length) return;
+  missing[0].scrollIntoView({ block: 'center', behavior: reduced() ? 'auto' : 'smooth' });
+  missing[0].querySelector('input').focus({ preventScroll: true });
+}
 function validate(q) {
   const a = ans[q.key];
   if (q.type === 'contact') {
@@ -253,7 +268,7 @@ function validate(q) {
   if (q.optional) return true;
   if (!qAnswered(q)) {
     let m = 'Choose an answer to continue.';
-    if (q.type === 'grid') { const left = q.rows.filter((_, i) => !a || a[i] === undefined).length; m = left + ' row' + (left > 1 ? 's' : '') + ' still need an answer.'; }
+    if (q.type === 'grid') { m = rowsLeftText(q); showMissingRows(q); }
     if (q.type === 'multi') m = 'Choose at least one answer.';
     if (q.type === 'text') m = 'Please type an answer to continue.';
     return fail(m);
@@ -381,7 +396,6 @@ function onSuccess() {
   $('#doneP').textContent = 'Your answers will shape what the next sponsor receives before their project begins.';
   setStatus('ok', 'Your answers are in. Thank you.'); document.title = 'Thank you – Sponsor Experience Survey';
   $('#steps').hidden = false; $('#closeTab').hidden = false;
-  confetti();
 }
 function onFailure() {
   $('#doneH').textContent = 'We could not confirm delivery';
@@ -399,7 +413,7 @@ function finish() {
 }
 $('#retry').addEventListener('click', send);
 $('#copy').addEventListener('click', async () => {
-  try { await navigator.clipboard.writeText(JSON.stringify(lastPayload, null, 2)); $('#copy').textContent = 'Copied'; }
+  try { await navigator.clipboard.writeText(buildRecap().text + '\nReference: ' + sid + '\n'); $('#copy').textContent = 'Copied'; }
   catch (e) { $('#copy').textContent = 'Copy blocked by this browser'; }
 });
 $('#share').addEventListener('click', async () => {
@@ -416,21 +430,6 @@ $('#download').addEventListener('click', () => {
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 });
 $('#print').addEventListener('click', () => { $('#mine').open = true; window.print(); });
-
-/* ---------- confetti (success only, skipped for reduced motion) ---------- */
-function confetti() {
-  if (reduced()) return;
-  const cv = $('#fx'), cx = cv.getContext('2d'); const W = cv.width = cv.offsetWidth, H = cv.height = cv.offsetHeight;
-  const root = getComputedStyle(document.documentElement);
-  const cols = ['--red', '--confetti', '--confetti', '--on-dark', '--pink'].map(v => root.getPropertyValue(v).trim() || '#fff');
-  const P = Array.from({ length: 150 }, () => ({ x: Math.random() * W, y: -20 - Math.random() * H * .5, w: 6 + Math.random() * 8, h: 10 + Math.random() * 10, vy: 2 + Math.random() * 4, vx: -1.5 + Math.random() * 3, r: Math.random() * 6, vr: -.2 + Math.random() * .4, c: cols[Math.random() * cols.length | 0] }));
-  const t0 = performance.now();
-  (function tick(t) {
-    cx.clearRect(0, 0, W, H); const age = t - t0; let alive = 0;
-    P.forEach(p => { p.x += p.vx; p.y += p.vy; p.r += p.vr; if (p.y < H + 30) alive++; cx.save(); cx.translate(p.x, p.y); cx.rotate(p.r); cx.fillStyle = p.c; cx.globalAlpha = Math.max(0, 1 - age / 4200); cx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); cx.restore(); });
-    if (alive && age < 4200) requestAnimationFrame(tick); else cx.clearRect(0, 0, W, H);
-  })(t0);
-}
 
 /* ---------- keyboard ---------- */
 // Record how the last answer was made, so auto-advance only follows a pointer tap or a shortcut key,
@@ -464,7 +463,7 @@ document.addEventListener('keydown', e => {
 /* ---------- welcome, preferences, boot ---------- */
 function setQuick(on) {
   quick = on; safe(() => localStorage.setItem(PREF, on ? 'on' : 'off'));
-  const b = $('#quick'); b.setAttribute('aria-pressed', String(on)); b.textContent = 'Quick mode: ' + (on ? 'on' : 'off');
+  const b = $('#quick'); b.setAttribute('aria-pressed', String(on)); b.textContent = 'Auto-advance: ' + (on ? 'on' : 'off');
   const q = curQ(); if (q) $('#hint').textContent = hintFor(q);
 }
 $('#quick').addEventListener('click', () => { setQuick(!quick); clearTimeout(autoT); });
