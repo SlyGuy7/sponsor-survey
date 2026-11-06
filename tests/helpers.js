@@ -52,7 +52,16 @@ async function answerAll(page, opts = {}) {
   return seen;
 }
 
-// Auto-advance (moving on after a tap) is switched off for tests that click "Next" themselves, so they cannot race the timer.
+// Answer and move on until the question text matches, so a test can examine one particular screen.
+async function goTo(page, re) {
+  for (let i = 0; i < 40; i++) {
+    if (re.test((await page.locator('.qtext').textContent()) || '')) return;
+    await answerCurrent(page); await page.waitForTimeout(150); await page.click('#next'); await page.waitForTimeout(300);
+  }
+  throw new Error('never reached ' + re);
+}
+
+// Quick mode (auto-advance after a tap) is switched off for tests that click "Next" themselves, so they cannot race the timer.
 const disableQuick = page => page.addInitScript(() => localStorage.setItem('njit-sponsor-survey-prefs', 'off'));
 
 // Opens the survey and lands on question 1.
@@ -64,4 +73,4 @@ async function startSurvey(page, { quick = false } = {}) {
   await page.waitForSelector('.qtext');
 }
 
-module.exports = { disableQuick, mockEndpoint, KIND, isDone, answerCurrent, answerAll, startSurvey };
+module.exports = { disableQuick, mockEndpoint, KIND, isDone, answerCurrent, answerAll, startSurvey, goTo };

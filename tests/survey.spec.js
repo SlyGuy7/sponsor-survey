@@ -1,5 +1,5 @@
 const { test, expect } = require('@playwright/test');
-const { mockEndpoint, answerAll, startSurvey, isDone } = require('./helpers');
+const { mockEndpoint, answerAll, startSurvey, isDone, goTo } = require('./helpers');
 
 const QUESTION = page => page.locator('.qtext');
 
@@ -53,20 +53,36 @@ test.describe('completing the survey', () => {
     expect(ctl.bodies).toHaveLength(1);
     expect(kinds.filter(k => k !== 'intro')).toHaveLength(23);   // 20 questions + 3 optional
     const payload = JSON.parse(ctl.bodies[0]);
-    expect(payload).toMatchObject({ client: 'v3', hp: '', contact_email: 'a@b.co', q10: 'Scope or goals, or signing the scope document' });
-    expect(payload.q11).toBeTruthy();
+    expect(payload).toMatchObject({ client: 'v4', hp: '', contact_email: 'a@b.co', q9: 'Scope or goals, or signing the scope document' });
+    expect(payload.q10).toBeTruthy();
     expect(payload.elapsedMs).toBeGreaterThan(0);
-    expect(await page.evaluate(() => localStorage.getItem('njit-sponsor-survey-v3'))).toBeNull();
+    expect(await page.evaluate(() => localStorage.getItem('njit-sponsor-survey-v4'))).toBeNull();
   });
 
-  test('skip logic: "Nothing was delayed" removes question 11', async ({ page }) => {
+  test('skip logic: "No significant delay" removes question 10 (the wait time)', async ({ page }) => {
     const ctl = await mockEndpoint(page);
     await startSurvey(page);
     const kinds = await answerAll(page, { pick: 0 });
     expect(kinds.filter(k => k !== 'intro')).toHaveLength(22);
     const payload = JSON.parse(ctl.bodies[0]);
-    expect(payload.q10).toBe('Nothing was delayed');
-    expect(payload).not.toHaveProperty('q11');
+    expect(payload.q9).toBe('No significant delay');
+    expect(payload).not.toHaveProperty('q10');
+  });
+
+  test('skip logic: "Not sure" also removes question 10, but a named issue and "Something else" keep it', async ({ page }) => {
+    await startSurvey(page);
+    await goTo(page, /longest delay/);
+    const last = page.locator('#ctl .opt').last();
+    await expect(last).toContainText('Not sure');
+    await last.click();
+    await page.click('#next');
+    await expect(page.locator('.qtext')).toContainText('named day-to-day contact');   // question 10 was skipped
+    await page.click('#back');
+    await expect(page.locator('.qtext')).toContainText('longest delay');
+    await page.waitForTimeout(500);
+    await page.locator('#ctl .opt').nth(1).click();
+    await page.click('#next');
+    await expect(page.locator('.qtext')).toContainText('how long did the team wait');
   });
 
   for (const mode of ['http500', 'html200', 'okfalse', 'abort']) {
@@ -79,7 +95,7 @@ test.describe('completing the survey', () => {
       await expect(page.locator('#retryRow')).toBeVisible();
       await expect(page.locator('#steps')).toBeHidden();
       await expect(page.locator('#closeTab')).toBeHidden();
-      expect(await page.evaluate(() => localStorage.getItem('njit-sponsor-survey-v3'))).not.toBeNull();
+      expect(await page.evaluate(() => localStorage.getItem('njit-sponsor-survey-v4'))).not.toBeNull();
       ctl.mode = 'ok';
       await page.click('#retry');
       await expect(page.locator('#doneH')).toContainText('Thank');
@@ -93,9 +109,9 @@ test.describe('completing the survey', () => {
     await startSurvey(page);
     await answerAll(page, { email: 'private@example.com' });
     await expect(page.locator('#doneH')).toHaveText('We could not confirm delivery');
-    const stored = await page.evaluate(() => localStorage.getItem('njit-sponsor-survey-v3'));
+    const stored = await page.evaluate(() => localStorage.getItem('njit-sponsor-survey-v4'));
     expect(stored).not.toContain('private@example.com');
-    expect(stored).not.toContain('contact');
+    expect(stored).not.toMatch(/"contact(_[a-z]+)?"\s*:/);   // no contact fields stored
   });
 });
 
@@ -164,13 +180,12 @@ test.describe('keyboard, history and resume', () => {
     await expect(page.locator('#qt')).toBeFocused();                      // focus moves to the new question
   });
 
-  test('digit shortcuts work and turning auto-advance off turns them off', async ({ page }) => {
+  test('digit shortcuts work and Quick mode turns them off', async ({ page }) => {
     await startSurvey(page, { quick: true });
     await page.keyboard.press('3');
     await expect(QUESTION(page)).toContainText('main focus', { timeout: 3000 });   // selected and auto-advanced
     await page.click('#quick');
     await expect(page.locator('#quick')).toHaveAttribute('aria-pressed', 'false');
-    await expect(page.locator('#quick')).toHaveText('Auto-advance: off');
     await page.keyboard.press('2');
     expect(await page.locator('#ctl .opt.sel').count()).toBe(0);
   });
@@ -201,5 +216,59 @@ test.describe('keyboard, history and resume', () => {
     await expect(page.locator('#q')).toHaveClass(/on/);
     await expect(page.locator('.qtext')).toContainText('organization');   // fresh start: back at question 1
     expect(await page.locator('#ctl .opt.sel').count()).toBe(0);           // earlier answers are gone
+  });
+});
+
+test.describe('Operations help, resource choice and the multiple-teams note', () => {
+  test('Part B opens with the note for sponsors who work with several teams', async ({ page }) => {
+    await startSurvey(page);
+    await goTo(page, /clear was each of these sponsor expectations/);
+    await expect(page.locator('.part-banner')).toContainText('If you work with multiple teams, please answer Parts B–D based on your most recently started project.');
+  });
+
+  test('question 14 is a five-point ease scale with two non-scale answers, at the end of Part C', async ({ page }) => {
+    await startSurvey(page);
+    await goTo(page, /get help from Capstone Operations/);
+    await expect(page.locator('#q')).toHaveAttribute('data-part', 'C');
+    await expect(page.locator('#ctl .sc')).toHaveCount(5);
+    await expect(page.locator('.scale-lbl')).toContainText('1 = Very difficult');
+    await expect(page.locator('.scale-lbl')).toContainText('5 = Very easy');
+    await expect(page.locator('#ctl .extra .opt')).toHaveText(['6I needed help but didn’t know whom to contact', '7I didn’t need help']);
+    await page.click('#next');                                               // required
+    await expect(page.locator('#err')).not.toBeEmpty();
+    await page.locator('#ctl .extra .opt').first().click();
+    await page.click('#next');
+    await expect(page.locator('#q')).toHaveAttribute('data-part', 'D');
+    await expect(page.locator('.qtext')).toContainText('time this project asked of you');
+  });
+
+  test('question 18: at most two resources, and "None of these" stands alone', async ({ page }) => {
+    const ctl = await mockEndpoint(page);
+    await startSurvey(page);
+    await goTo(page, /Which resources would have helped you most/);
+    await expect(page.locator('.qhint')).toHaveText('Choose up to two.');
+    await expect(page.locator('#ctl .opt')).toHaveCount(8);
+    const checked = () => page.locator('#ctl input[type=checkbox]:checked').count();
+    await page.locator('#ctl .opt').nth(0).click();
+    await page.locator('#ctl .opt').nth(1).click();
+    await page.locator('#ctl .opt').nth(2).click();                          // a third is refused
+    expect(await checked()).toBe(2);
+    await expect(page.locator('#err')).toContainText('up to two');
+    await page.locator('#ctl .opt').nth(1).click();                          // untick one, then a different one is allowed
+    await page.locator('#ctl .opt').nth(6).click();
+    expect(await checked()).toBe(2);
+    await expect(page.locator('#ctl .opt').nth(6)).toContainText('A named Operations contact and instructions for getting help');
+    await page.locator('#ctl .opt').nth(7).click();                          // "None of these" clears the rest
+    expect(await checked()).toBe(1);
+    await page.locator('#ctl .opt').nth(0).click();                          // choosing a resource clears "None of these"
+    expect(await checked()).toBe(1);
+    await expect(page.locator('#ctl .opt').nth(7)).not.toHaveClass(/sel/);
+  });
+
+  test('question 20 is optional and asks what Operations could have done', async ({ page }) => {
+    await startSurvey(page);
+    await goTo(page, /one thing Capstone Operations could have done/);
+    await expect(page.locator('.qhint')).toHaveText('Optional.');
+    await expect(page.locator('#next')).toContainText('Skip');
   });
 });

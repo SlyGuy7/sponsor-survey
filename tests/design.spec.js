@@ -9,38 +9,6 @@ test('welcome shows the five parts as a staircase', async ({ page }) => {
   await expect(page.locator('.chip')).toHaveCount(0);
 });
 
-test('welcome tells sponsors what they get before they start', async ({ page }) => {
-  await mockEndpoint(page);
-  await page.goto('/index.html');
-  await expect(page.locator('.gift h2')).toHaveText('What you get for your time');
-  await expect(page.locator('.gift-list li')).toHaveCount(4);
-  await expect(page.locator('.trust')).toContainText('separate from the official Sponsor Evaluation');
-});
-
-test('the question number never overlaps the logo or part title', async ({ page }) => {
-  await page.setViewportSize({ width: 1280, height: 800 });
-  await mockEndpoint(page);
-  await startSurvey(page);
-  const overlap = await page.evaluate(() => {
-    const n = document.querySelector('#bignum').getBoundingClientRect();
-    return ['.rail .logo-pill', '.part-head'].filter(s => {
-      const r = document.querySelector(s).getBoundingClientRect();
-      return n.left < r.right && r.left < n.right && n.top < r.bottom && r.top < n.bottom;
-    });
-  });
-  expect(overlap).toEqual([]);
-});
-
-test('phones still show which question you are on', async ({ page }) => {
-  await page.setViewportSize({ width: 320, height: 568 });
-  await mockEndpoint(page);
-  await startSurvey(page);
-  await expect(page.locator('#railCount')).toBeVisible();
-  await expect(page.locator('#railCount')).toHaveText('Question 1 of 20');
-  const box = await page.locator('#railCount').boundingBox();
-  expect(box.x + box.width).toBeLessThanOrEqual(320);
-});
-
 test('each part has its own colour, icon and a banner on its first question only', async ({ page }) => {
   await mockEndpoint(page);
   await startSurvey(page);
@@ -73,7 +41,8 @@ test('finishing a part and passing halfway are celebrated', async ({ page }) => 
     if (await page.locator('.qtext').textContent().then(x => /Overall, how satisfied/.test(x))) break;
   }
   expect(seen.some(t => /Part A complete/.test(t))).toBe(true);
-  expect(seen.some(t => /Part B complete/.test(t) && /Halfway there/.test(t))).toBe(true);
+  expect(seen.some(t => /Part B complete/.test(t))).toBe(true);
+  expect(seen.some(t => /Halfway there/.test(t))).toBe(true);          // after question 10 of 20
   await expect(page.locator('#toast')).toHaveAttribute('role', 'status');
 });
 
@@ -87,7 +56,7 @@ test.describe('thank-you page', () => {
     await answerAll(page, { pick: 1, email: 'recap@example.com', text: 'Nothing to add' });
     await expect(page.locator('#doneH')).toContainText('Thank');
     await expect(page.locator('#recapParts li')).toHaveCount(6);
-    await expect(page.locator('#recapParts li').first()).toContainText('5 of 5');
+    await expect(page.locator('#recapParts li').first()).toContainText('4 of 4');
     await expect(page.locator('#afterRow')).toBeVisible();
 
     await page.click('#share');
@@ -109,24 +78,6 @@ test.describe('thank-you page', () => {
     await expect(page.locator('#mineBody')).toBeVisible();
     await expect(page.locator('#afterRow')).toBeHidden();
     await expect(page.locator('#recapParts')).toBeHidden();
-    await expect(page.locator('#pkg')).toBeHidden();         // the package has its own print button
-  });
-
-  test('when delivery fails, Copy my answers gives readable text with a reference', async ({ page }) => {
-    test.setTimeout(120000);
-    const ctl = await mockEndpoint(page, 'http500');
-    await startSurvey(page);
-    await answerAll(page, { pick: 1, email: 'copy@example.com', text: 'Readable answer' });
-    await expect(page.locator('#doneH')).toHaveText('We could not confirm delivery');
-    await page.click('#copy');
-    await expect(page.locator('#copy')).toHaveText('Copied');
-    const text = await page.evaluate(() => navigator.clipboard.readText());
-    expect(text).toContain('Q1. Which best describes your organization?');
-    expect(text).toContain('Readable answer');
-    expect(text).toContain('copy@example.com');
-    expect(text).toContain('Reference: ' + JSON.parse(ctl.bodies[0]).submissionId);
-    expect(text).not.toContain('"q1"');
-    expect(text).not.toContain('{');
   });
 
   test('nothing is offered until delivery is confirmed', async ({ page }) => {

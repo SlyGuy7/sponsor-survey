@@ -43,16 +43,23 @@ test('items are well formed and ids are unique', () => {
     assert.ok(i.title && i.body && i.source, i.id);
     for (const u of i.unless || []) assert.ok(ids.includes(u), i.id + ' unless ' + u);
   }
-  for (const k of C.kit) { assert.ok(k.title && k.source, k.id); assert.ok(k.rates in KEYS, k.id + ' rates ' + k.rates); }
-  assert.equal(C.kit.length, S.questions.find(q => q.n === 18).rows.length, 'one kit item per question 18 row');
+  const q18 = S.questions.find(q => q.n === 18);
+  const labels = q18.options.map(o => o.label);
+  for (const k of C.kit) {
+    assert.ok(k.title && k.source, k.id);
+    assert.ok(k.picks && k.picks.length, k.id + ' needs picks');
+    for (const p of k.picks) assert.ok(labels.includes(p), `${k.id}: question 18 has no answer "${p}"`);
+  }
+  // every real choice in question 18 leads to a kit item ("None of these" is the only one that does not)
+  for (const o of q18.options.filter(o => !o.exclusive)) assert.ok(C.kit.some(k => k.picks.includes(o.label)), 'no kit item for: ' + o.label);
   for (const d of C.dates) assert.match(d.until, /^\d{4}-\d{2}-\d{2}$/);
 });
 
 const NOV3 = new Date(2026, 10, 3);
 const ids = l => l.map(i => i.id);
 // answers with nothing wrong
-const GOOD = { q4: '2 to 3', q6_r1: '5', q6_r2: '5', q6_r3: '5', q6_r4: '5', q6_r5: '5', q6_r6: '5', q6_r7: '5', q7: 'I read it closely',
-  q9_r1: 'Ready before Sprint 1 (by Sept 28)', q9_r2: 'Ready during Sprint 1 (by Oct 8)', q9_r3: 'Not needed for our project', q12: 'From the first team meeting', q13: 'Weekly or more', q14: 'No', q15: 'About what I expected', q16: 4 };
+const GOOD = { q4: '2 to 3', q5_r1: '5', q5_r2: '5', q5_r3: '5', q5_r4: '5', q5_r5: '5', q5_r6: '5', q5_r7: '5', q6: 'I read it closely',
+  q8_r1: 'Ready before Sprint 1 (by Sept 28)', q8_r2: 'Ready during Sprint 1 (by Oct 8)', q8_r3: 'Not needed for our project', q11: 'From the first team meeting', q12: 'Weekly or more', q13: 'No', q14: 5, q15: 'About what I expected', q16: 4 };
 
 test('a sponsor with nothing wrong gets no "needs attention" items', () => {
   const r = R.build(C, GOOD, NOV3);
@@ -61,26 +68,26 @@ test('a sponsor with nothing wrong gets no "needs attention" items', () => {
 });
 
 test('each readiness gap shows its own fix, and late counts as a gap', () => {
-  const r = R.build(C, { ...GOOD, q9_r2: 'Still not ready', q9_r4: 'Ready after Oct 8', q9_r8: 'Still not ready' }, NOV3);
+  const r = R.build(C, { ...GOOD, q8_r2: 'Still not ready', q8_r4: 'Ready after Oct 8', q8_r8: 'Still not ready' }, NOV3);
   assert.deepEqual(ids(r.fix), ['gap-scope-doc', 'gap-data', 'gap-nda']);
 });
 
 test('unclear expectations give refreshers, and a refresher steps aside when its fix is already shown', () => {
-  const unclear = { ...GOOD, q6_r3: '2', q6_r7: 'I do not recall' };
+  const unclear = { ...GOOD, q5_r3: '2', q5_r7: 'I do not recall' };
   assert.deepEqual(ids(R.build(C, unclear, NOV3).refresh), ['rf-scope', 'rf-eval']);
-  const both = R.build(C, { ...unclear, q9_r2: 'Still not ready' }, NOV3);
+  const both = R.build(C, { ...unclear, q8_r2: 'Still not ready' }, NOV3);
   assert.deepEqual(ids(both.refresh), ['rf-eval']);          // rf-scope hidden: the scope-document fix covers it
   assert.deepEqual(ids(both.fix), ['gap-scope-doc']);
 });
 
 test('multi-select and scale answers are matched', () => {
-  assert.deepEqual(ids(R.build(C, { ...GOOD, q8: 'Email from the program or professor | I never received this information' }, NOV3).refresh), ['guide-missing']);
+  assert.deepEqual(ids(R.build(C, { ...GOOD, q7: 'Email from the program or professor | I never received this information' }, NOV3).refresh), ['guide-missing']);
   assert.deepEqual(ids(R.build(C, { ...GOOD, q16: 2 }, NOV3).fix), ['unhappy-start']);
   assert.deepEqual(ids(R.build(C, { ...GOOD, q16: 3 }, NOV3).fix), []);
 });
 
 test('a skipped question never triggers anything', () => {
-  const r = R.build(C, { ...GOOD, q11: undefined }, NOV3);
+  const r = R.build(C, { ...GOOD, q10: undefined }, NOV3);
   assert.ok(!ids(r.fix).includes('blocked-now'));
 });
 
@@ -91,16 +98,26 @@ test('dates: only those still ahead are listed', () => {
   assert.equal(R.build(C, GOOD, new Date(2026, 11, 14)).dates.length, 0);
 });
 
-test('the new-sponsor kit is ordered by what the sponsor rated most useful', () => {
-  const r = R.build(C, { q18_r3: '5', q18_r1: '4', q18_r6: '2', q18_r2: 'Not sure', q19: 'A Discord post when my team is confirmed' }, NOV3);
-  assert.deepEqual(ids(r.kit).slice(0, 3), ['kit-sprint1', 'kit-checklist', 'kit-welcome']);
-  assert.deepEqual(r.kit.filter(k => k.top).map(k => k.id), ['kit-sprint1', 'kit-checklist']);
+test('the new-sponsor kit puts what the sponsor picked first', () => {
+  const r = R.build(C, { q18: 'A week-by-week checklist for Sprint 1, up to the Oct 8 readiness package | A welcome post in your team\'s Discord channel', q19: 'A Discord post when my team is confirmed' }, NOV3);
+  assert.deepEqual(ids(r.kit).slice(0, 2), ['kit-sprint1', 'kit-welcome']);
+  assert.deepEqual(r.kit.filter(k => k.top).map(k => k.id), ['kit-sprint1', 'kit-welcome']);
   assert.equal(r.delivery, 'A Discord post when my team is confirmed');
   assert.equal(R.build(C, { q19: 'No preference' }, NOV3).delivery, '');
+  // a named Operations contact leads to the "who to contact" card; "None of these" keeps the default order
+  assert.equal(ids(R.build(C, { q18: 'A named Operations contact and instructions for getting help' }, NOV3).kit)[0], 'kit-contacts');
+  const none = R.build(C, { q18: 'None of these' }, NOV3);
+  assert.deepEqual(ids(none.kit), C.kit.map(k => k.id));
+  assert.equal(none.kit.some(k => k.top), false);
+});
+
+test('trouble getting help from Operations gives the "who to contact" fix', () => {
+  for (const v of ['I needed help but didn’t know whom to contact', 1, 2]) assert.deepEqual(ids(R.build(C, { ...GOOD, q14: v }, NOV3).fix), ['help-gap']);
+  for (const v of [3, 4, 5, 'I didn’t need help']) assert.deepEqual(ids(R.build(C, { ...GOOD, q14: v }, NOV3).fix), []);
 });
 
 test('contact details can never reach the package', () => {
-  const r = R.build(C, { ...GOOD, contact_name: 'Pat Example', contact_org: 'Acme', contact_email: 'pat@acme.test', q9_r2: 'Still not ready' }, NOV3);
+  const r = R.build(C, { ...GOOD, contact_name: 'Pat Example', contact_org: 'Acme', contact_email: 'pat@acme.test', q8_r2: 'Still not ready' }, NOV3);
   const text = JSON.stringify(r);
   for (const s of ['Pat Example', 'Acme', 'pat@acme.test']) assert.ok(!text.includes(s), s);
 });
