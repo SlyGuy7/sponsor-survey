@@ -76,129 +76,129 @@ var COLUMNS = [
   "width": 230
  },
  {
-  "key": "q5",
-  "label": "Q5. How would you describe your own technical background for this project?",
+  "key": "q5_r1",
+  "label": "Q5. Meeting with the team about weekly (30 to 60 minutes)",
+  "width": 200
+ },
+ {
+  "key": "q5_r2",
+  "label": "Q5. Giving timely feedback at sprint reviews and the midterm",
+  "width": 200
+ },
+ {
+  "key": "q5_r3",
+  "label": "Q5. Signing a scope document with the Project Manager by the end of Sprint 1",
+  "width": 200
+ },
+ {
+  "key": "q5_r4",
+  "label": "Q5. Separating must-have goals from stretch goals",
+  "width": 200
+ },
+ {
+  "key": "q5_r5",
+  "label": "Q5. Telling the Project Manager early about student concerns, instead of removing a student yourself",
+  "width": 200
+ },
+ {
+  "key": "q5_r6",
+  "label": "Q5. Attending the Industry Open House and the Final Showcase",
+  "width": 200
+ },
+ {
+  "key": "q5_r7",
+  "label": "Q5. Completing the official Sponsor Evaluation by Dec 13",
+  "width": 200
+ },
+ {
+  "key": "q6",
+  "label": "Q6. Which best describes your use of the Sponsor Partnership Guide & FAQ before the project started?",
   "width": 230
- },
- {
-  "key": "q6_r1",
-  "label": "Q6. Meeting with the team about weekly (30 to 60 minutes)",
-  "width": 200
- },
- {
-  "key": "q6_r2",
-  "label": "Q6. Giving timely feedback at sprint reviews and the midterm",
-  "width": 200
- },
- {
-  "key": "q6_r3",
-  "label": "Q6. Signing a scope document with the Project Manager by the end of Sprint 1",
-  "width": 200
- },
- {
-  "key": "q6_r4",
-  "label": "Q6. Separating must-have goals from stretch goals",
-  "width": 200
- },
- {
-  "key": "q6_r5",
-  "label": "Q6. Telling the Project Manager early about student concerns, instead of removing a student yourself",
-  "width": 200
- },
- {
-  "key": "q6_r6",
-  "label": "Q6. Attending the Industry Open House and the Final Showcase",
-  "width": 200
- },
- {
-  "key": "q6_r7",
-  "label": "Q6. Completing the official Sponsor Evaluation by Dec 13",
-  "width": 200
  },
  {
   "key": "q7",
-  "label": "Q7. Which best describes your use of the Sponsor Partnership Guide & FAQ before the project started?",
-  "width": 230
- },
- {
-  "key": "q8",
-  "label": "Q8. Where did you learn what was expected of you?",
+  "label": "Q7. Where did you learn what was expected of you?",
   "width": 260
  },
  {
-  "key": "q8_other",
-  "label": "Q8 - Other (typed answer)",
+  "key": "q7_other",
+  "label": "Q7 - Other (typed answer)",
   "width": 200
  },
  {
-  "key": "q9_r1",
-  "label": "Q9. Clear goals, with must-haves separated from stretch goals",
+  "key": "q8_r1",
+  "label": "Q8. Clear goals, with must-haves separated from stretch goals",
   "width": 200
  },
  {
-  "key": "q9_r2",
-  "label": "Q9. A signed scope document",
+  "key": "q8_r2",
+  "label": "Q8. A signed scope document",
   "width": 200
  },
  {
-  "key": "q9_r3",
-  "label": "Q9. Written requirements and acceptance criteria",
+  "key": "q8_r3",
+  "label": "Q8. Written requirements and acceptance criteria",
   "width": 200
  },
  {
-  "key": "q9_r4",
-  "label": "Q9. Data, documents, or sample material",
+  "key": "q8_r4",
+  "label": "Q8. Data, documents, or sample material",
   "width": 200
  },
  {
-  "key": "q9_r5",
-  "label": "Q9. Accounts, tools, or system access",
+  "key": "q8_r5",
+  "label": "Q8. Accounts, tools, or system access",
   "width": 200
  },
  {
-  "key": "q9_r6",
-  "label": "Q9. One named representative who can make decisions",
+  "key": "q8_r6",
+  "label": "Q8. One named representative who can make decisions",
   "width": 200
  },
  {
-  "key": "q9_r7",
-  "label": "Q9. A named technical contact",
+  "key": "q8_r7",
+  "label": "Q8. A named technical contact",
   "width": 200
  },
  {
-  "key": "q9_r8",
-  "label": "Q9. NDA or agreement completed by every team member",
+  "key": "q8_r8",
+  "label": "Q8. NDA or agreement completed by every team member",
+  "width": 200
+ },
+ {
+  "key": "q9",
+  "label": "Q9. Which issue, if any, caused the longest delay in your team’s ability to begin meaningful work?",
+  "width": 230
+ },
+ {
+  "key": "q9_other",
+  "label": "Q9 - Other (typed answer)",
   "width": 200
  },
  {
   "key": "q10",
-  "label": "Q10. Which one item caused the team the longest wait?",
+  "label": "Q10. About how long did the team wait for that issue to be resolved?",
   "width": 230
  },
  {
-  "key": "q10_other",
-  "label": "Q10 - Other (typed answer)",
-  "width": 200
- },
- {
   "key": "q11",
-  "label": "Q11. About how long did the team wait for that item?",
+  "label": "Q11. How soon did the team have a named day-to-day contact on your side who could answer technical questions?",
   "width": 230
  },
  {
   "key": "q12",
-  "label": "Q12. How soon did the team have a named day-to-day contact on your side who could answer technical questions?",
+  "label": "Q12. During Sprints 1 to 3, how often did you hold a regular check-in with the team?",
   "width": 230
  },
  {
   "key": "q13",
-  "label": "Q13. During Sprints 1 to 3, how often did you hold a regular check-in with the team?",
+  "label": "Q13. After the semester began, did your project's scope change?",
   "width": 230
  },
  {
   "key": "q14",
-  "label": "Q14. After the semester began, did your project's scope change?",
-  "width": 230
+  "label": "Q14. During the first month, how easy was it to get help from Capstone Operations when you needed it?",
+  "width": 200
  },
  {
   "key": "q15",
@@ -216,34 +216,9 @@ var COLUMNS = [
   "width": 380
  },
  {
-  "key": "q18_r1",
-  "label": "Q18. A pre-kickoff checklist of what to prepare (scope, data, access, contact)",
-  "width": 200
- },
- {
-  "key": "q18_r2",
-  "label": "Q18. A scope document template to sign with the Project Manager",
-  "width": 200
- },
- {
-  "key": "q18_r3",
-  "label": "Q18. A week-by-week checklist for Sprint 1, up to the Oct 8 readiness package",
-  "width": 200
- },
- {
-  "key": "q18_r4",
-  "label": "Q18. A one-page summary of the Sponsor Guide",
-  "width": 200
- },
- {
-  "key": "q18_r5",
-  "label": "Q18. A \"who to contact when\" card (PM first, then Capstone leadership)",
-  "width": 200
- },
- {
-  "key": "q18_r6",
-  "label": "Q18. A welcome post in your team's Discord channel",
-  "width": 200
+  "key": "q18",
+  "label": "Q18. Which resources would have helped you most before kickoff or during your first month?",
+  "width": 260
  },
  {
   "key": "q19",
@@ -252,7 +227,7 @@ var COLUMNS = [
  },
  {
   "key": "q20",
-  "label": "Q20. What do you wish someone had told you before the project began?",
+  "label": "Q20. What is one thing Capstone Operations could have done to better prepare or support you before kickoff or during your first month?",
   "width": 380
  },
  {
