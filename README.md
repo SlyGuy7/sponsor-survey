@@ -62,11 +62,11 @@ After a sponsor's answers are confirmed, the thank-you page shows a personalised
 
 ## Results dashboard
 
-`dashboard.html` shows the team's results as charts, a heat table for the grid questions, the free-text answers (with a filter for the ones sponsors allowed us to quote) and a CSV download. It is private by key, not by hiding the page:
+`dashboard.html` opens with an "At a glance" section (the biggest readiness gaps, the least clear expectations and the resources sponsors most wanted before kickoff) and then shows the team's results as charts, a heat table for the grid questions, the free-text answers (with a filter for the ones sponsors allowed us to quote) and a CSV download. It is private by key, not by hiding the page:
 
 1. In Apps Script, run `createDashboardKey` once. Open the Execution log and copy the key it prints.
-2. Open `https://slyguy7.github.io/sponsor-survey/dashboard.html#key=YOUR_KEY` (or open the page and paste the key into the form). The key is removed from the address bar as soon as the page reads it and is never stored.
-3. Share the key only with the Operations team and the professor. To replace it, run `createDashboardKey` again; the old key stops working immediately.
+2. Open `https://slyguy7.github.io/sponsor-survey/dashboard.html` and paste the key into the form. Tick "Remember on this device" to skip this step next time in that browser; "Forget this device" removes it again. Do not tick it on a shared computer. A link ending in `#key=YOUR_KEY` also works; the key is removed from the address bar as soon as the page reads it and a link never saves it.
+3. Share the key only with the Operations team and the professor. To replace it, run `createDashboardKey` again; the old key stops working immediately, and any browser that remembered it asks for the new one.
 
 The script never returns names, organizations, emails or submission IDs, so they cannot appear on the dashboard or in its CSV. Redeploy the script (new version) after updating `Code.gs`.
 
@@ -80,7 +80,7 @@ Open http://localhost:8000/. To test failure handling without touching the real 
 
 ## Design
 
-Each part of the survey has its own rail color and icon, and a short banner on its first question. A message appears when a part is finished and at the halfway point. The welcome page draws the five parts as a staircase, grids become a matrix with column headings on wide screens, the page follows the device's light or dark setting, and the thank-you page offers a recap, a link to share, a downloadable copy of the answers and a print layout.
+Each part of the survey has its own rail color and icon, and a short banner on its first question. A message appears when a part is finished and at the halfway point. The welcome page says what a sponsor gets for their time and shows the five parts as a row of steps, grids become a matrix with column headings on wide screens, the page follows the device's light or dark setting, and the thank-you page offers a recap, a link to share, a downloadable copy of the answers and a print layout.
 
 ## Privacy
 
