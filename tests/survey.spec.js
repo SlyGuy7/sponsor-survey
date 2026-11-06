@@ -180,12 +180,13 @@ test.describe('keyboard, history and resume', () => {
     await expect(page.locator('#qt')).toBeFocused();                      // focus moves to the new question
   });
 
-  test('digit shortcuts work and Quick mode turns them off', async ({ page }) => {
+  test('digit shortcuts work and turning auto-advance off turns them off', async ({ page }) => {
     await startSurvey(page, { quick: true });
     await page.keyboard.press('3');
     await expect(QUESTION(page)).toContainText('main focus', { timeout: 3000 });   // selected and auto-advanced
     await page.click('#quick');
     await expect(page.locator('#quick')).toHaveAttribute('aria-pressed', 'false');
+    await expect(page.locator('#quick')).toHaveText('Auto-advance: off');
     await page.keyboard.press('2');
     expect(await page.locator('#ctl .opt.sel').count()).toBe(0);
   });
