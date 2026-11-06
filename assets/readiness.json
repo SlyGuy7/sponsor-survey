@@ -21,42 +21,42 @@
 
   "now": [
     {
-      "id": "gap-goals", "level": "fix", "gap": "q9_r1",
+      "id": "gap-goals", "level": "fix", "gap": "q8_r1",
       "title": "Separate must-have goals from stretch goals",
       "body": "Your answers show clear goals were late or are still open. The guide treats scope as a learning contract: the semester needs a must-have outcome, kept apart from stretch goals and future product work.",
       "steps": ["List the outcomes the team must deliver this semester.", "List the nice-to-haves separately.", "Review both lists with your PM and record any change."],
       "source": "Sponsor Guide, section 3"
     },
     {
-      "id": "gap-scope-doc", "level": "fix", "gap": "q9_r2",
+      "id": "gap-scope-doc", "level": "fix", "gap": "q8_r2",
       "title": "Sign the scope document with your PM",
       "body": "Your answers show the signed scope document was late or is still open. The sponsor representative and the PM sign it, and it was due by the Oct. 8 readiness deadline. It should cover boundaries, objectives, deliverables, assumptions, responsibilities and acceptance expectations.",
       "steps": ["Ask your PM for the current scope document.", "Check that each of those six parts matches your expectations, then sign.", "If something blocks signing, tell the PM first, then Capstone leadership."],
       "source": "Sponsor Guide, section 6"
     },
     {
-      "id": "gap-requirements", "level": "fix", "gap": "q9_r3",
+      "id": "gap-requirements", "level": "fix", "gap": "q8_r3",
       "title": "Write down requirements and what \"done\" looks like",
       "body": "Your answers show written requirements or acceptance criteria were late or are still open. The guide asks sponsors for clear priorities, acceptance expectations, and feedback when user stories or prototypes are reviewed.",
       "steps": ["For each main deliverable, write one or two sentences on what \"done\" looks like.", "Give them to your PM so they appear in the team's tasks."],
       "source": "Sponsor Guide, sections 3 and 5"
     },
     {
-      "id": "gap-data", "level": "fix", "gap": "q9_r4",
+      "id": "gap-data", "level": "fix", "gap": "q8_r4",
       "title": "Get data and documents to the team",
       "body": "Your answers show data or documents were late or are still missing. Students need enough domain context, sample data, documentation or APIs to make progress. Confidential material should travel only through sponsor-approved channels, under your signed agreement and the approved NDA.",
       "steps": ["List what the team still lacks.", "Share it through a channel your organization approves.", "If confidentiality is a worry, raise it with Capstone rather than creating a separate NDA."],
       "source": "Sponsor Guide, sections 3 and 6, and FAQ 15"
     },
     {
-      "id": "gap-access", "level": "fix", "gap": "q9_r5",
+      "id": "gap-access", "level": "fix", "gap": "q8_r5",
       "title": "Set up accounts, tools and system access",
       "body": "Your answers show access was late or is still missing. The guide asks sponsors to provide access and environments early enough for students to use them. A sponsor tool such as Slack, Teams or Jira can be used in addition to the official Capstone Discord, but it does not replace it.",
       "steps": ["Name exactly what the team cannot reach yet.", "Grant access, or tell the PM what is blocking it and why."],
       "source": "Sponsor Guide, sections 3 and 5, and FAQ 4"
     },
     {
-      "id": "gap-decider", "level": "fix", "gap": "q9_r6",
+      "id": "gap-decider", "level": "fix", "gap": "q8_r6",
       "title": "Name one representative who can make decisions",
       "body": "Your answers show a decision-maker was late to be named or still is not. The guide asks for one primary sponsor representative who can make or coordinate timely decisions.",
       "steps": ["Decide who that is, whether you or a colleague.", "Tell your PM their name and how to reach them."],
@@ -64,39 +64,47 @@
     },
     {
       "id": "gap-contact", "level": "fix",
-      "when": { "any": [ { "gap": "q9_r7" }, { "key": "q12", "in": ["After Sprint 1", "Not yet"] } ] },
+      "when": { "any": [ { "gap": "q8_r7" }, { "key": "q11", "in": ["After Sprint 1", "Not yet"] } ] },
       "title": "Name a technical contact for the team",
       "body": "Your answers show the team got a named technical contact late, or still has none. Students need someone who can answer technical and domain questions. The guide asks sponsors to provide contacts, constraints and decisions early.",
       "steps": ["Pick someone who can answer the team's technical questions.", "Introduce them to the PM and the team."],
       "source": "Sponsor Guide, section 5"
     },
     {
-      "id": "gap-nda", "level": "fix", "gap": "q9_r8",
+      "id": "gap-nda", "level": "fix", "gap": "q8_r8",
       "title": "Confirm every team member's NDA is complete",
       "body": "Your answers show the NDA or agreement step was late or is still open. Every Industry team member must complete the required NDA by the announced deadline, and confidentiality and IP follow your executed agreement and the approved NDA.",
       "steps": ["Ask your PM whether every team member has completed it.", "If anything is missing, raise it with the PM and Capstone leadership.", "Do not introduce a separate NDA outside the approved process."],
       "source": "Sponsor Guide, section 6"
     },
     {
-      "id": "blocked-now", "level": "fix", "key": "q11", "in": ["Still waiting"],
+      "id": "blocked-now", "level": "fix", "key": "q10", "in": ["Still waiting"],
       "title": "Something is still holding your team up",
       "body": "You told us the team is still waiting on an item. Start with the PM for routine coordination. For unresolved scope, compliance or program concerns, the guide says to contact Capstone leadership promptly rather than waiting until the Showcase.",
       "steps": ["Tell the PM exactly what is missing and what you can do about it.", "If it is not resolved soon, contact Capstone leadership (see \"Who to contact\" below)."],
       "source": "Sponsor Guide, FAQ 16"
     },
     {
-      "id": "scope-undocumented", "level": "fix", "key": "q14", "in": ["A major change, not documented"],
+      "id": "scope-undocumented", "level": "fix", "key": "q13", "in": ["A major change, not documented"],
       "title": "Document your scope change with the PM",
       "body": "You told us the scope changed in a major way without being documented. The guide allows scope changes when needed, but they should be documented with the PM and stay realistic within the five-sprint schedule. Large late expansions are best avoided.",
       "steps": ["Write a short note on what changed and why.", "Send it to the PM so the team's plan and scope document are updated."],
       "source": "Sponsor Guide, section 5, and FAQ 5"
     },
     {
-      "id": "rhythm-gap", "level": "fix", "key": "q13", "in": ["Rarely", "No regular check-ins"],
+      "id": "rhythm-gap", "level": "fix", "key": "q12", "in": ["Rarely", "No regular check-ins"],
       "title": "Set up a regular check-in",
       "body": "You told us there has been little or no regular check-in. The guide strongly prefers weekly check-ins, typically 30 to 60 minutes, with one primary sponsor representative. Weekly or every-two-weeks can work for some projects, but long communication gaps do not.",
       "steps": ["Pick a recurring slot with your PM.", "Use it to review progress, clarify priorities and answer the team's questions."],
       "source": "Sponsor Guide, section 5, and FAQ 3"
+    },
+    {
+      "id": "help-gap", "level": "fix",
+      "when": { "any": [ { "key": "q14", "in": ["I needed help but didn’t know whom to contact", "1", "2"] } ] },
+      "title": "Know who to contact when you need help",
+      "body": "You told us it was hard, or unclear whom to ask, when you needed help in the first month. The guide sets a simple route: start with your PM for routine coordination, and go to Capstone leadership promptly for unresolved performance, scope, compliance or program concerns.",
+      "steps": ["Ask your PM first for day-to-day questions.", "If something stays unresolved, contact Capstone leadership (the contacts are listed under Who to contact)."],
+      "source": "Sponsor Guide, FAQ 16 and section 11"
     },
     {
       "id": "unhappy-start", "level": "fix", "key": "q16", "in": ["1", "2"],
@@ -107,49 +115,49 @@
     },
 
     {
-      "id": "rf-weekly", "level": "refresh", "unless": ["rhythm-gap"], "low": "q6_r1",
+      "id": "rf-weekly", "level": "refresh", "unless": ["rhythm-gap"], "low": "q5_r1",
       "title": "Weekly check-ins",
       "body": "Weekly check-ins of about 30 to 60 minutes are strongly preferred, with one primary representative. Weekly or every two weeks can be workable for some projects, but long gaps are not.",
       "steps": ["Agree a recurring slot with your PM if you do not have one."],
       "source": "Sponsor Guide, section 5, and FAQ 3"
     },
     {
-      "id": "rf-feedback", "level": "refresh", "low": "q6_r2",
+      "id": "rf-feedback", "level": "refresh", "low": "q5_r2",
       "title": "Feedback at sprint reviews and the midterm",
       "body": "At sprint reviews you review progress, clarify priorities, answer questions and confirm whether user stories and deliverables meet expectations. At the midterm you review what the team has actually built or defined and give corrective feedback.",
       "steps": ["Before Sun, Nov. 8, look at the team's midterm evidence.", "Tell your PM early if direction needs correcting."],
       "source": "Sponsor Guide, sections 5 and 9"
     },
     {
-      "id": "rf-scope", "level": "refresh", "unless": ["gap-scope-doc"], "low": "q6_r3",
+      "id": "rf-scope", "level": "refresh", "unless": ["gap-scope-doc"], "low": "q5_r3",
       "title": "The scope document",
       "body": "The sponsor representative and the PM sign a scope document that sets boundaries, objectives, deliverables, assumptions, responsibilities and acceptance expectations. It was due by Oct. 8.",
       "steps": ["Ask your PM to show you the signed copy."],
       "source": "Sponsor Guide, section 6"
     },
     {
-      "id": "rf-stretch", "level": "refresh", "unless": ["gap-goals"], "low": "q6_r4",
+      "id": "rf-stretch", "level": "refresh", "unless": ["gap-goals"], "low": "q5_r4",
       "title": "Must-have goals versus stretch goals",
       "body": "Keep the must-have outcome for the semester separate from stretch goals and future product work. That keeps the project teachable and achievable.",
       "steps": ["Check that your PM's plan keeps the two lists apart."],
       "source": "Sponsor Guide, section 3"
     },
     {
-      "id": "rf-concerns", "level": "refresh", "low": "q6_r5",
+      "id": "rf-concerns", "level": "refresh", "low": "q5_r5",
       "title": "Raising a concern about a student",
       "body": "Tell the PM early and describe observable facts, such as a missed meeting, a missed task, an unanswered message or a quality concern. Keep it factual and professional. Do not remove or reassign a student yourself: the PM runs a three-step warning process, and persistent issues go to Capstone leadership.",
       "steps": ["Report to the PM with specific facts.", "Escalate to Capstone leadership only if the issue persists."],
       "source": "Sponsor Guide, section 7, and FAQ 7 and 8"
     },
     {
-      "id": "rf-events", "level": "refresh", "low": "q6_r6",
+      "id": "rf-events", "level": "refresh", "low": "q5_r6",
       "title": "Plan for the Final Showcase",
       "body": "The Showcase is Saturday, Dec. 5, 11:00 AM to 7:00 PM in the NJIT Campus Center Ballroom. All teams are required. Plan to support your team, attend the relevant presentation and judging period, and join sponsor engagement as scheduled.",
       "steps": ["Put the date in your calendar now.", "Watch for the sponsor logistics sent with the event schedule."],
       "source": "Sponsor Guide, sections 2 and 9"
     },
     {
-      "id": "rf-eval", "level": "refresh", "low": "q6_r7",
+      "id": "rf-eval", "level": "refresh", "low": "q5_r7",
       "title": "The official Sponsor Evaluation (due Dec. 13)",
       "body": "The Sponsor Evaluation is a separate component from Showcase judging and counts for 270 of the Industry scorecard's 1,000 base points (27%). Judge what you actually observed: follow-through, professionalism, communication, responsiveness, growth, quality of deliverables, use of feedback, and the value of the outcome. Do not grade only on whether every stretch goal was completed.",
       "steps": ["Complete the official form by Sun, Dec. 13, 11:59 PM.", "This survey is not the Sponsor Evaluation; it is separate."],
@@ -157,21 +165,21 @@
     },
     {
       "id": "guide-missing", "level": "refresh",
-      "when": { "any": [ { "key": "q7", "in": ["I received it but did not open it", "I never received it", "I did not know it existed"] }, { "key": "q8", "has": "I never received this information" } ] },
+      "when": { "any": [ { "key": "q6", "in": ["I received it but did not open it", "I never received it", "I did not know it existed"] }, { "key": "q7", "has": "I never received this information" } ] },
       "title": "Get the Sponsor Partnership Guide & FAQ",
       "body": "The guide is a sponsor-only companion covering the calendar, scope and readiness rules, communication, how teams are evaluated and a sponsor FAQ. Your signed agreement and the live course schedule take priority if any wording differs.",
       "steps": ["Ask your PM or your Capstone contact for the current copy."],
       "source": "Sponsor Guide, front page and section 3"
     },
     {
-      "id": "scope-unsure", "level": "refresh", "key": "q14", "in": ["I am not sure"],
+      "id": "scope-unsure", "level": "refresh", "key": "q13", "in": ["I am not sure"],
       "title": "Check that scope changes are recorded",
       "body": "Scope changes should go through the PM and be documented, and should stay realistic within the five-sprint schedule.",
       "steps": ["Ask your PM whether the current scope matches what you expect."],
       "source": "Sponsor Guide, section 5, and FAQ 5"
     },
     {
-      "id": "rhythm-light", "level": "refresh", "key": "q13", "in": ["About every two weeks", "Only at sprint reviews or milestones"],
+      "id": "rhythm-light", "level": "refresh", "key": "q12", "in": ["About every two weeks", "Only at sprint reviews or milestones"],
       "title": "Consider a more regular rhythm",
       "body": "Weekly check-ins are strongly preferred. Every two weeks can work for some projects, but contact only at sprint reviews risks long gaps.",
       "steps": ["Ask your PM whether a short weekly slot would help the team."],
@@ -195,7 +203,7 @@
 
   "kit": [
     {
-      "id": "kit-checklist", "rates": "q18_r1",
+      "id": "kit-checklist", "picks": ["A pre-kickoff checklist of what to prepare (scope, data, access, contact)"],
       "title": "Pre-kickoff checklist",
       "intro": "What a sponsor should have ready before the team starts.",
       "steps": [
@@ -210,7 +218,7 @@
       "source": "Sponsor Guide, sections 3, 5 and 11"
     },
     {
-      "id": "kit-scope", "rates": "q18_r2",
+      "id": "kit-scope", "picks": ["A scope document template to sign with the Project Manager"],
       "title": "Scope document template",
       "intro": "A starter outline for the document you sign with your PM. Confirm it against the current Capstone scope form.",
       "template": [
@@ -224,7 +232,7 @@
       "source": "Sponsor Guide, section 6"
     },
     {
-      "id": "kit-sprint1", "rates": "q18_r3",
+      "id": "kit-sprint1", "picks": ["A week-by-week checklist for Sprint 1, up to the Oct 8 readiness package"],
       "title": "Sprint 1 checklist, up to the readiness package",
       "intro": "Fall 2026 dates shown as an example.",
       "timeline": [
@@ -236,7 +244,7 @@
       "source": "Sponsor Guide, sections 2 and 6"
     },
     {
-      "id": "kit-summary", "rates": "q18_r4",
+      "id": "kit-summary", "picks": ["A one-page summary of the Sponsor Guide"],
       "title": "One-page summary of the Sponsor Guide",
       "intro": "The essentials in one place.",
       "steps": [
@@ -250,14 +258,14 @@
       "source": "Sponsor Guide, sections 1, 5, 7, 8 and 10"
     },
     {
-      "id": "kit-contacts", "rates": "q18_r5",
+      "id": "kit-contacts", "picks": ["A \"who to contact when\" card (PM first, then Capstone leadership)", "A named Operations contact and instructions for getting help"],
       "title": "\"Who to contact when\" card",
       "intro": "Start with the PM. Go to Capstone leadership promptly for unresolved performance, scope, compliance or program concerns, rather than waiting until the Showcase.",
       "contacts": true,
       "source": "Sponsor Guide, FAQ 16 and section 11"
     },
     {
-      "id": "kit-welcome", "rates": "q18_r6",
+      "id": "kit-welcome", "picks": ["A welcome post in your team's Discord channel"],
       "title": "Welcome post for your team's Discord channel",
       "intro": "A sample message. Replace the brackets. Teams stay reachable in their official Capstone Discord channel; a sponsor's own Slack or Teams can be added alongside it.",
       "sample": "Welcome, [team name]! Your sponsor representative is [name]. Your technical contact is [name]. We will check in every [day and time] for about 30 to 60 minutes. Your PM and [name] will sign the scope document by [date]. For access, data or priority questions, post here and tag [name].",

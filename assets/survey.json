@@ -9,7 +9,7 @@
     {
       "id": "B",
       "name": "Before the project started",
-      "note": "These questions are about what you knew and what was ready when your student team began.",
+      "note": "If you work with multiple teams, please answer Parts B–D based on your most recently started project. These questions are about what you knew and what was ready when your student team began.",
       "label": "Part B"
     },
     {
@@ -184,35 +184,6 @@
     },
     {
       "n": 5,
-      "part": "A",
-      "text": "How would you describe your own technical background for this project?",
-      "hint": "",
-      "type": "single",
-      "options": [
-        {
-          "label": "Hands-on technical (I could do the work myself)",
-          "other": false
-        },
-        {
-          "label": "Technical manager (I understand the work but do not do it)",
-          "other": false
-        },
-        {
-          "label": "Business or non-technical (I set the goals and others handle the technology)",
-          "other": false
-        },
-        {
-          "label": "A mix of these",
-          "other": false
-        },
-        {
-          "label": "Prefer not to say",
-          "other": false
-        }
-      ]
-    },
-    {
-      "n": 6,
       "part": "B",
       "text": "Before your team started, how clear was each of these sponsor expectations to you?",
       "hint": "Choose one answer for each row. 1 = Not at all clear, 5 = Completely clear.",
@@ -236,7 +207,7 @@
       ]
     },
     {
-      "n": 7,
+      "n": 6,
       "part": "B",
       "text": "Which best describes your use of the Sponsor Partnership Guide & FAQ before the project started?",
       "hint": "",
@@ -269,7 +240,7 @@
       ]
     },
     {
-      "n": 8,
+      "n": 7,
       "part": "B",
       "text": "Where did you learn what was expected of you?",
       "hint": "Select all that apply.",
@@ -316,7 +287,7 @@
       ]
     },
     {
-      "n": 9,
+      "n": 8,
       "part": "B",
       "text": "When your student team began, how ready was each of the following?",
       "hint": "Choose one answer for each row.",
@@ -340,16 +311,16 @@
       ]
     },
     {
-      "n": 10,
+      "n": 9,
       "part": "B",
-      "text": "Which one item caused the team the longest wait?",
+      "text": "Which issue, if any, caused the longest delay in your team’s ability to begin meaningful work?",
       "hint": "",
       "type": "single",
       "options": [
         {
-          "label": "Nothing was delayed",
+          "label": "No significant delay",
           "other": false,
-          "skipTo": 12
+          "skipTo": 11
         },
         {
           "label": "Scope or goals, or signing the scope document",
@@ -382,13 +353,18 @@
         {
           "label": "Something else",
           "other": true
+        },
+        {
+          "label": "Not sure",
+          "other": false,
+          "skipTo": 11
         }
       ]
     },
     {
-      "n": 11,
+      "n": 10,
       "part": "C",
-      "text": "About how long did the team wait for that item?",
+      "text": "About how long did the team wait for that issue to be resolved?",
       "hint": "",
       "type": "single",
       "options": [
@@ -419,7 +395,7 @@
       ]
     },
     {
-      "n": 12,
+      "n": 11,
       "part": "C",
       "text": "How soon did the team have a named day-to-day contact on your side who could answer technical questions?",
       "hint": "",
@@ -448,7 +424,7 @@
       ]
     },
     {
-      "n": 13,
+      "n": 12,
       "part": "C",
       "text": "During Sprints 1 to 3, how often did you hold a regular check-in with the team?",
       "hint": "",
@@ -477,7 +453,7 @@
       ]
     },
     {
-      "n": 14,
+      "n": 13,
       "part": "C",
       "text": "After the semester began, did your project's scope change?",
       "hint": "",
@@ -503,6 +479,19 @@
           "label": "I am not sure",
           "other": false
         }
+      ]
+    },
+    {
+      "n": 14,
+      "part": "C",
+      "text": "During the first month, how easy was it to get help from Capstone Operations when you needed it?",
+      "hint": "",
+      "type": "scale",
+      "low": "Very difficult",
+      "high": "Very easy",
+      "extra": [
+        "I needed help but didn’t know whom to contact",
+        "I didn’t need help"
       ]
     },
     {
@@ -555,24 +544,44 @@
     {
       "n": 18,
       "part": "E",
-      "text": "How useful would each of these have been to you?",
-      "hint": "Choose one answer for each row. 1 = Not useful, 5 = Very useful.",
-      "type": "grid",
-      "cols": [
-        "1",
-        "2",
-        "3",
-        "4",
-        "5",
-        "Not sure"
-      ],
-      "rows": [
-        "A pre-kickoff checklist of what to prepare (scope, data, access, contact)",
-        "A scope document template to sign with the Project Manager",
-        "A week-by-week checklist for Sprint 1, up to the Oct 8 readiness package",
-        "A one-page summary of the Sponsor Guide",
-        "A \"who to contact when\" card (PM first, then Capstone leadership)",
-        "A welcome post in your team's Discord channel"
+      "text": "Which resources would have helped you most before kickoff or during your first month?",
+      "hint": "Choose up to two.",
+      "type": "multi",
+      "max": 2,
+      "options": [
+        {
+          "label": "A pre-kickoff checklist of what to prepare (scope, data, access, contact)",
+          "other": false
+        },
+        {
+          "label": "A scope document template to sign with the Project Manager",
+          "other": false
+        },
+        {
+          "label": "A week-by-week checklist for Sprint 1, up to the Oct 8 readiness package",
+          "other": false
+        },
+        {
+          "label": "A one-page summary of the Sponsor Guide",
+          "other": false
+        },
+        {
+          "label": "A \"who to contact when\" card (PM first, then Capstone leadership)",
+          "other": false
+        },
+        {
+          "label": "A welcome post in your team's Discord channel",
+          "other": false
+        },
+        {
+          "label": "A named Operations contact and instructions for getting help",
+          "other": false
+        },
+        {
+          "label": "None of these",
+          "other": false,
+          "exclusive": true
+        }
       ]
     },
     {
@@ -607,7 +616,7 @@
     {
       "n": 20,
       "part": "E",
-      "text": "What do you wish someone had told you before the project began?",
+      "text": "What is one thing Capstone Operations could have done to better prepare or support you before kickoff or during your first month?",
       "hint": "",
       "type": "text",
       "optional": true

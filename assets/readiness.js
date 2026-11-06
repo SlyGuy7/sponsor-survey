@@ -7,9 +7,9 @@
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
 
-  // Answers that count as "not in place in time" for the readiness grid (question 9) ...
+  // Answers that count as "not in place in time" for the readiness grid (question 8) ...
   const GAP = ['Ready after Oct 8', 'Still not ready'];
-  // ... and as "unclear" for the expectations grid (question 6).
+  // ... and as "unclear" for the expectations grid (question 5).
   const LOW = ['1', '2', 'I do not recall'];
 
   const val = (a, k) => (a && a[k] !== undefined && a[k] !== null) ? String(a[k]) : '';
@@ -35,10 +35,11 @@
     const ids = new Set(hit.map(i => i.id));
     const shown = hit.filter(i => !(i.unless || []).some(u => ids.has(u)));
     const by = lvl => shown.filter(i => i.level === lvl);
+    const chosen = val(a, 'q18').split(' | ');   // question 18: up to two resources the sponsor picked
     const kit = content.kit
-      .map((k, idx) => { const r = Number(val(a, k.rates)); return Object.assign({}, k, { idx, rating: r >= 1 && r <= 5 ? r : 0 }); })
-      .sort((x, y) => y.rating - x.rating || x.idx - y.idx)
-      .map(k => Object.assign(k, { top: k.rating >= 4 }));
+      .map((k, idx) => Object.assign({}, k, { idx, picked: (k.picks || []).some(p => chosen.includes(p)) }))
+      .sort((x, y) => Number(y.picked) - Number(x.picked) || x.idx - y.idx)
+      .map(k => Object.assign(k, { top: k.picked }));
     const pref = val(a, 'q19');
     return {
       fix: by('fix'), refresh: by('refresh'), info: by('info'),
@@ -106,9 +107,10 @@
   function panelKit(r) {
     return [
       el('p', { class: 'pkg-ph', text: 'If you were a new sponsor' }),
-      el('p', { class: 'pkg-lead', text: 'If you were starting as a new sponsor today, this is the readiness kit we would hand you. It is drafted from the Sponsor Guide and ordered by what you said would help you most.' }),
+      el('p', { class: 'pkg-lead', text: 'If you were starting as a new sponsor today, this is the readiness kit we would hand you. It is drafted from the Sponsor Guide and ordered by what you said would have helped you most.' }),
       r.delivery ? el('p', { class: 'pkg-note', text: 'Noted: you would prefer to receive it as "' + r.delivery.charAt(0).toLowerCase() + r.delivery.slice(1) + '".' }) : null,
-      r.kit.map(k => card(k, r, { open: k.top, tag: k.rating ? 'You rated this ' + k.rating + ' of 5' : '' }))
+      el('h3', { text: 'Your readiness kit' }),
+      r.kit.map(k => card(k, r, { open: k.top, tag: k.picked ? 'You picked this' : '' }))
     ];
   }
 
