@@ -227,16 +227,12 @@ var COLUMNS = [
  },
  {
   "key": "q20",
-<<<<<<< HEAD
   "label": "Q20. How likely are you to sponsor a Capstone project again?",
   "width": 170
  },
  {
   "key": "q21",
   "label": "Q21. What is one thing Capstone Operations could have done to better prepare or support you before kickoff or during your first month?",
-=======
-  "label": "Q20. What is one thing Capstone Operations could have done to better prepare or support you before kickoff or during your first month?",
->>>>>>> e6e34a4791f2934965f30e257d68093792729d25
   "width": 380
  },
  {
