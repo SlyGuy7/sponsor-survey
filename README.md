@@ -4,6 +4,8 @@ A 20-question survey for project sponsors, built by the Fall 2026 NJIT capstone 
 
 Live site: https://slyguy7.github.io/sponsor-survey/
 
+Backup copy: Cloudflare Pages also publishes this repo on every push to `main`, for networks that block `github.io`. The `_redirects` file makes the `/sponsor-survey/` paths work there too. Both copies send answers to the same Apps Script, so it doesn't matter which one a sponsor uses.
+
 ## How it works
 
 - Static site on GitHub Pages: plain HTML, CSS and JavaScript, no build step, no third-party scripts.

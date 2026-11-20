@@ -1,0 +1,5 @@
+# Used by Cloudflare Pages (the backup host). GitHub Pages ignores this file.
+# On GitHub Pages the site lives under /sponsor-survey/; on the backup host it lives at the root.
+# This rewrite makes /sponsor-survey/... paths (used by 404.html and old links) work on both.
+/sponsor-survey    /        200
+/sponsor-survey/*  /:splat  200
