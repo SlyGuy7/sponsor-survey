@@ -266,6 +266,7 @@ test.describe('Operations help, resource choice and the multiple-teams note', ()
     await expect(page.locator('#ctl .opt').nth(7)).not.toHaveClass(/sel/);
   });
 
+<<<<<<< HEAD
   test('question 20 asks how likely the sponsor is to sponsor again, on a five-point scale', async ({ page }) => {
     await startSurvey(page);
     await goTo(page, /sponsor a Capstone project again/);
@@ -281,6 +282,9 @@ test.describe('Operations help, resource choice and the multiple-teams note', ()
   });
 
   test('question 21 is optional and asks what Operations could have done', async ({ page }) => {
+=======
+  test('question 20 is optional and asks what Operations could have done', async ({ page }) => {
+>>>>>>> e6e34a4791f2934965f30e257d68093792729d25
     await startSurvey(page);
     await goTo(page, /one thing Capstone Operations could have done/);
     await expect(page.locator('.qhint')).toHaveText('Optional.');

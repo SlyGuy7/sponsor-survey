@@ -74,7 +74,11 @@ test('finishing a part and passing halfway are celebrated', async ({ page }) => 
   }
   expect(seen.some(t => /Part A complete/.test(t))).toBe(true);
   expect(seen.some(t => /Part B complete/.test(t))).toBe(true);
+<<<<<<< HEAD
   expect(seen.some(t => /Halfway there/.test(t))).toBe(true);          // after question 10 of 21
+=======
+  expect(seen.some(t => /Halfway there/.test(t))).toBe(true);          // after question 10 of 20
+>>>>>>> e6e34a4791f2934965f30e257d68093792729d25
   await expect(page.locator('#toast')).toHaveAttribute('role', 'status');
 });
 
