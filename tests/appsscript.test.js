@@ -47,7 +47,7 @@ function load({ existingHeader } = {}) {
   return { ctx, state, post };
 }
 
-const base = { submissionId: 's-1', elapsedMs: 60000, hp: '', q1: 'Small company (10 to 99)', q20: '+1 hi', contact_email: 'a@b.co', bogus: 'x' };
+const base = { submissionId: 's-1', elapsedMs: 60000, hp: '', q1: 'Small company (10 to 99)', q21: '+1 hi', contact_email: 'a@b.co', bogus: 'x' };
 
 test('saves a valid submission under readable headers', () => {
   const { state, post } = load();
@@ -69,8 +69,8 @@ test('neutralises spreadsheet formula injection', () => {
   const { state, post } = load(); post({ ...base, q17: '=HYPERLINK("http://x","y")' });
   const col = state.rows[0].findIndex(h => h.startsWith('Q17.'));
   assert.strictEqual(state.rows[1][col], '\'=HYPERLINK("http://x","y")');
-  const c20 = state.rows[0].findIndex(h => h.startsWith('Q20.'));
-  assert.strictEqual(state.rows[1][c20], "'+1 hi");
+  const c21 = state.rows[0].findIndex(h => h.startsWith('Q21.'));
+  assert.strictEqual(state.rows[1][c21], "'+1 hi");
 });
 
 test('a retry with the same submissionId is not saved twice', () => {

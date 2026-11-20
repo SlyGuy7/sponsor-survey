@@ -3,7 +3,7 @@
 
 /* ---------- configuration ---------- */
 const ENDPOINT = 'https://script.google.com/macros/s/AKfycbxwJBFhmA1rF7pGtUPVpPwqblEnttvOuaUfCXjdgJDlWTFpAHdhyiPJbE6tPYRPMS2_2A/exec';
-const STORE = 'njit-sponsor-survey-v3';
+const STORE = 'njit-sponsor-survey-v4';
 const PREF = 'njit-sponsor-survey-prefs';
 const TTL = 24 * 60 * 60 * 1000;          // saved progress expires after 24 hours
 const SEND_TIMEOUT = 20000;
@@ -190,9 +190,11 @@ function pickOpt(q, i) {
   const o = q.options[i], cur = ans[q.key] || {};
   if (q.type === 'multi') {
     const set = new Set(cur.v || []);
+    $('#err').textContent = '';
     if (set.has(o.label)) set.delete(o.label);
     else {
       if (o.exclusive) set.clear(); else q.options.filter(x => x.exclusive).forEach(x => set.delete(x.label));
+      if (q.max && set.size >= q.max) { syncOpts(q); return fail('You can choose up to ' + (q.max === 2 ? 'two' : q.max) + '. Untick one to choose a different answer.'); }
       set.add(o.label);
     }
     ans[q.key] = { ...cur, v: [...set] };
@@ -316,7 +318,7 @@ addEventListener('popstate', () => {
 
 /* ---------- submit ---------- */
 function payload() {
-  const o = { submissionId: sid, submittedAt: new Date().toISOString(), elapsedMs: Date.now() - started, hp: $('#hp').value, client: 'v3' };
+  const o = { submissionId: sid, submittedAt: new Date().toISOString(), elapsedMs: Date.now() - started, hp: $('#hp').value, client: 'v4' };
   QS.forEach(q => {
     const a = ans[q.key];
     if (skipped(q) || a === undefined || a === null) return;
@@ -388,6 +390,9 @@ $('#printPkg').addEventListener('click', () => {
 });
 function onSuccess() {
   showPackage(lastPayload);
+  // A link that rebuilds the kit on kit.html. The answers travel only as option codes after the #, which no server receives.
+  $('#openKit').href = 'kit.html#kit=' + Readiness.encode(QS, lastPayload);
+  $('#kitRow').hidden = false;
   renderRecap();
   wipe(); lastPayload = null; ans = {};
   $('#doneH').innerHTML = 'Thank <em>you.</em>';
@@ -405,7 +410,7 @@ function finish() {
   lastPayload = payload(); show(done); stage.innerHTML = '';
   document.title = 'Sending – Sponsor Experience Survey';
   $('#doneH').textContent = 'Sending…'; $('#steps').hidden = true; $('#closeTab').hidden = true;
-  ['#recapParts', '#mine', '#afterRow', '#pkg'].forEach(s => { $(s).hidden = true; });
+  ['#recapParts', '#mine', '#afterRow', '#pkg', '#kitRow'].forEach(s => { $(s).hidden = true; });
   $('#doneH').focus({ preventScroll: true });
   send();
 }

@@ -36,7 +36,7 @@ test('phones still show which question you are on', async ({ page }) => {
   await mockEndpoint(page);
   await startSurvey(page);
   await expect(page.locator('#railCount')).toBeVisible();
-  await expect(page.locator('#railCount')).toHaveText('Question 1 of 20');
+  await expect(page.locator('#railCount')).toHaveText('Question 1 of 21');
   const box = await page.locator('#railCount').boundingBox();
   expect(box.x + box.width).toBeLessThanOrEqual(320);
 });
@@ -73,7 +73,8 @@ test('finishing a part and passing halfway are celebrated', async ({ page }) => 
     if (await page.locator('.qtext').textContent().then(x => /Overall, how satisfied/.test(x))) break;
   }
   expect(seen.some(t => /Part A complete/.test(t))).toBe(true);
-  expect(seen.some(t => /Part B complete/.test(t) && /Halfway there/.test(t))).toBe(true);
+  expect(seen.some(t => /Part B complete/.test(t))).toBe(true);
+  expect(seen.some(t => /Halfway there/.test(t))).toBe(true);          // after question 10 of 21
   await expect(page.locator('#toast')).toHaveAttribute('role', 'status');
 });
 
@@ -87,7 +88,7 @@ test.describe('thank-you page', () => {
     await answerAll(page, { pick: 1, email: 'recap@example.com', text: 'Nothing to add' });
     await expect(page.locator('#doneH')).toContainText('Thank');
     await expect(page.locator('#recapParts li')).toHaveCount(6);
-    await expect(page.locator('#recapParts li').first()).toContainText('5 of 5');
+    await expect(page.locator('#recapParts li').first()).toContainText('4 of 4');
     await expect(page.locator('#afterRow')).toBeVisible();
 
     await page.click('#share');

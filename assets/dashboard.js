@@ -165,22 +165,28 @@ function glanceCard(title, meta, items, extra) {
   if (!items.length) return null;
   return el('article', { class: 'card q-card' }, el('h3', { text: title }), el('p', { class: 'meta', text: meta }), rankList(items), extra || null);
 }
-// The most common answer to question 10, leaving out "Nothing was delayed" (the option that skips ahead).
+// Ranks the options of a "choose up to N" question by how many sponsors picked each, leaving out stand-alone answers such as "None of these".
+function rankPicks(q) {
+  const answers = ROWS.map(r => r[q.key]).filter(has).map(v => String(v).split(' | '));
+  return q.options.filter(o => !o.exclusive).map(o => ({ label: o.label, n: answers.filter(a => a.includes(o.label)).length, of: answers.length }))
+    .filter(x => x.of > 0 && x.n > 0).sort((a, b) => pct(b.n, b.of) - pct(a.n, a.of) || b.n - a.n).slice(0, 5);
+}
+// The most common answer to question 9, leaving out the options that skip ahead ("No significant delay", "Not sure").
 function topWait() {
-  const q = byNumber(10); if (!q) return null;
+  const q = byNumber(9); if (!q) return null;
   const none = q.options.filter(o => o.skipTo).map(o => o.label);
-  const counts = tally(ROWS.map(r => r.q10).filter(has).map(String).filter(v => !none.includes(v)), []);
+  const counts = tally(ROWS.map(r => r.q9).filter(has).map(String).filter(v => !none.includes(v)), []);
   const max = Math.max(0, ...counts.map(c => c[1]));
   if (!max) return null;
   return el('p', { class: 'avg', text: 'Most common longest wait: ' + counts.filter(c => c[1] === max).map(c => c[0]).join(' / ') + ' (' + plural(max, 'sponsor') + ')' });
 }
 function renderGlance() {
   const n = ROWS.length;
-  const q9 = byNumber(9), q6 = byNumber(6), q18 = byNumber(18);
+  const ready = byNumber(8), clear = byNumber(5), wanted = byNumber(18);
   const cards = [
-    q9 && glanceCard('Where readiness slipped', 'Ready after Oct 8 or still not ready. “Not needed” is left out.', rankRows(q9, ['Ready after Oct 8', 'Still not ready'], ['Not needed for our project']), topWait()),
-    q6 && glanceCard('Least clear expectations', 'Rated 1 or 2, or “I do not recall”.', rankRows(q6, ['1', '2', 'I do not recall'], [])),
-    q18 && glanceCard('Most wanted in the kit', 'Rated 4 or 5. “Not sure” is left out.', rankRows(q18, ['4', '5'], ['Not sure'])),
+    ready && glanceCard('Where readiness slipped', 'Ready after Oct 8 or still not ready. “Not needed” is left out.', rankRows(ready, ['Ready after Oct 8', 'Still not ready'], ['Not needed for our project']), topWait()),
+    clear && glanceCard('Least clear expectations', 'Rated 1 or 2, or “I do not recall”.', rankRows(clear, ['1', '2', 'I do not recall'], [])),
+    wanted && glanceCard('Most wanted before kickoff', 'Each sponsor could pick up to two. “None of these” is left out.', rankPicks(wanted)),
   ].filter(Boolean);
   $('#glanceCards').replaceChildren(...cards);
   $('#glanceNote').textContent = n < 5 ? 'Only ' + plural(n, 'response') + ' so far, so treat these as early signals. Top five in each list.' : 'Top five in each list, highest share first.';

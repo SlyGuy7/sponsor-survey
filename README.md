@@ -1,6 +1,6 @@
 # Sponsor Experience Survey
 
-A 20-question survey for project sponsors, built by the Fall 2026 NJIT capstone Operations team. It asks how prepared sponsors were before their student team began, so the next sponsor starts ready.
+A 21-question survey for project sponsors, built by the Fall 2026 NJIT capstone Operations team. It asks how prepared sponsors were before their student team began, so the next sponsor starts ready.
 
 Live site: https://slyguy7.github.io/sponsor-survey/
 
@@ -28,7 +28,7 @@ Live site: https://slyguy7.github.io/sponsor-survey/
 
 ## Change a question
 
-Edit `assets/survey.json`. Question types: `single`, `multi`, `scale`, `grid`, `text`, `contact`. An option with `"skipTo": 12` skips questions numbered below 12. An option with `"exclusive": true` clears the other choices in a multi-select. Set `config.contactEmail` to show a contact link on the welcome and thank-you pages.
+Edit `assets/survey.json`. Question types: `single`, `multi`, `scale`, `grid`, `text`, `contact`. An option with `"skipTo": 12` skips questions numbered below 12. An option with `"exclusive": true` clears the other choices in a multi-select, and `"max": 2` on a multi-select limits how many answers can be chosen. Set `config.contactEmail` to show a contact link on the welcome and thank-you pages.
 
 ## Set up or redeploy the response collector
 
@@ -62,7 +62,7 @@ After a sponsor's answers are confirmed, the thank-you page shows a personalised
 
 ## Results dashboard
 
-`dashboard.html` opens with an "At a glance" section (the biggest readiness gaps, the least clear expectations and the most wanted kit items) and then shows the team's results as charts, a heat table for the grid questions, the free-text answers (with a filter for the ones sponsors allowed us to quote) and a CSV download. It is private by key, not by hiding the page:
+`dashboard.html` opens with an "At a glance" section (the biggest readiness gaps, the least clear expectations and the resources sponsors most wanted before kickoff) and then shows the team's results as charts, a heat table for the grid questions, the free-text answers (with a filter for the ones sponsors allowed us to quote) and a CSV download. It is private by key, not by hiding the page:
 
 1. In Apps Script, run `createDashboardKey` once. Open the Execution log and copy the key it prints.
 2. Open `https://slyguy7.github.io/sponsor-survey/dashboard.html` and paste the key into the form. Tick "Remember on this device" to skip this step next time in that browser; "Forget this device" removes it again. Do not tick it on a shared computer. A link ending in `#key=YOUR_KEY` also works; the key is removed from the address bar as soon as the page reads it and a link never saves it.
@@ -85,3 +85,7 @@ Each part of the survey has its own rail color and icon, and a short banner on i
 ## Privacy
 
 Responses are anonymous unless the respondent enters contact details on the last screens. The page is marked `noindex`. Fonts are self-hosted, so visiting the page sends nothing to Google except the answers a respondent chooses to submit.
+
+## The reopenable kit page
+
+After a response is confirmed, the thank-you screen shows an "Open my readiness kit" button. It goes to `kit.html#kit=...`, where `assets/kit.js` rebuilds the same package from option codes in the address (`Readiness.encode` and `Readiness.decode` in `assets/readiness.js`). The codes sit after the `#`, which browsers never send to a server, and they contain no names, emails or free text. A missing or damaged link shows a short message instead of a kit.

@@ -175,9 +175,9 @@ test.describe('at a glance', () => {
 
   test('ranks the biggest gaps, and leaves out answers that do not count', async ({ page }) => {
     const rows = [
-      row({ q9_r1: 'Still not ready', q9_r2: 'Ready after Oct 8', q10: 'Data or documents', q16: 2 }),
-      row({ q9_r1: 'Ready after Oct 8', q9_r2: 'Ready before Sprint 1 (by Sept 28)', q10: 'Data or documents', q16: 4 }),
-      row({ q9_r1: NOT_NEEDED, q9_r2: 'Ready before Sprint 1 (by Sept 28)', q10: 'Nothing was delayed', q16: 3 }),
+      row({ q8_r1: 'Still not ready', q8_r2: 'Ready after Oct 8', q9: 'Data or documents', q16: 2, q18: 'A named Operations contact and instructions for getting help | A pre-kickoff checklist of what to prepare (scope, data, access, contact)' }),
+      row({ q8_r1: 'Ready after Oct 8', q8_r2: 'Ready before Sprint 1 (by Sept 28)', q9: 'Data or documents', q16: 4, q18: 'A named Operations contact and instructions for getting help' }),
+      row({ q8_r1: NOT_NEEDED, q8_r2: 'Ready before Sprint 1 (by Sept 28)', q9: 'No significant delay', q16: 3, q18: 'None of these' }),
     ];
     await mock(page, OK(rows));
     await page.goto('/dashboard.html#key=k');
@@ -188,7 +188,12 @@ test.describe('at a glance', () => {
     await expect(first).toContainText('100%');
     await expect(card.locator('.bars li').nth(1)).toContainText('1 of 3');
     await expect(card).toContainText('Most common longest wait: Data or documents (2 sponsors)');
-    await expect(card).not.toContainText('Nothing was delayed');
+    await expect(card).not.toContainText('No significant delay');
+    const wanted = page.locator('#glanceCards .q-card', { hasText: 'Most wanted before kickoff' });
+    await expect(wanted.locator('.bars li').first()).toContainText('A named Operations contact');
+    await expect(wanted.locator('.bars li').first()).toContainText('2 of 3');            // "None of these" still counts as an answer
+    await expect(wanted.locator('.bars li').nth(1)).toContainText('1 of 3');
+    await expect(wanted.locator('.bars')).not.toContainText('None of these');
     await expect(page.locator('#tiles')).toContainText('3.0 / 5');
     await expect(page.locator('#glanceNote')).toContainText('Only 3 responses');
   });

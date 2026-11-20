@@ -7,9 +7,9 @@
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
 
-  // Answers that count as "not in place in time" for the readiness grid (question 9) ...
+  // Answers that count as "not in place in time" for the readiness grid (question 8) ...
   const GAP = ['Ready after Oct 8', 'Still not ready'];
-  // ... and as "unclear" for the expectations grid (question 6).
+  // ... and as "unclear" for the expectations grid (question 5).
   const LOW = ['1', '2', 'I do not recall'];
 
   const val = (a, k) => (a && a[k] !== undefined && a[k] !== null) ? String(a[k]) : '';
@@ -35,10 +35,11 @@
     const ids = new Set(hit.map(i => i.id));
     const shown = hit.filter(i => !(i.unless || []).some(u => ids.has(u)));
     const by = lvl => shown.filter(i => i.level === lvl);
+    const chosen = val(a, 'q18').split(' | ');   // question 18: up to two resources the sponsor picked
     const kit = content.kit
-      .map((k, idx) => { const r = Number(val(a, k.rates)); return Object.assign({}, k, { idx, rating: r >= 1 && r <= 5 ? r : 0 }); })
-      .sort((x, y) => y.rating - x.rating || x.idx - y.idx)
-      .map(k => Object.assign(k, { top: k.rating >= 4 }));
+      .map((k, idx) => Object.assign({}, k, { idx, picked: (k.picks || []).some(p => chosen.includes(p)) }))
+      .sort((x, y) => Number(y.picked) - Number(x.picked) || x.idx - y.idx)
+      .map(k => Object.assign(k, { top: k.picked }));
     const pref = val(a, 'q19');
     return {
       fix: by('fix'), refresh: by('refresh'), info: by('info'),
@@ -106,9 +107,10 @@
   function panelKit(r) {
     return [
       el('p', { class: 'pkg-ph', text: 'If you were a new sponsor' }),
-      el('p', { class: 'pkg-lead', text: 'If you were starting as a new sponsor today, this is the readiness kit we would hand you. It is drafted from the Sponsor Guide and ordered by what you said would help you most.' }),
+      el('p', { class: 'pkg-lead', text: 'If you were starting as a new sponsor today, this is the readiness kit we would hand you. It is drafted from the Sponsor Guide and ordered by what you said would have helped you most.' }),
       r.delivery ? el('p', { class: 'pkg-note', text: 'Noted: you would prefer to receive it as "' + r.delivery.charAt(0).toLowerCase() + r.delivery.slice(1) + '".' }) : null,
-      r.kit.map(k => card(k, r, { open: k.top, tag: k.rating ? 'You rated this ' + k.rating + ' of 5' : '' }))
+      el('h3', { text: 'Your readiness kit' }),
+      r.kit.map(k => card(k, r, { open: k.top, tag: k.picked ? 'You picked this' : '' }))
     ];
   }
 
@@ -138,5 +140,41 @@
     return { fix: r.fix.length, refresh: r.refresh.length, kit: r.kit.length };
   }
 
-  return { GAP, LOW, matches, build, mount };
+
+  /* ---------- reopenable link ----------
+     A sponsor's answers are turned into short option codes, such as "5-0123-1" for question 5.
+     The codes go after the # in kit.html's address, which a browser never sends to any server.
+     No names, emails or free text are included. */
+  const CODED = q => q.n && q.type !== 'text' && q.type !== 'contact';
+
+  function encode(questions, a) {
+    const parts = [];
+    (questions || []).filter(CODED).forEach(q => {
+      const k = 'q' + q.n; let v = '';
+      if (q.type === 'single') { const i = q.options.findIndex(o => o.label === val(a, k)); if (i >= 0) v = String(i); }
+      else if (q.type === 'multi') v = val(a, k).split(' | ').map(l => q.options.findIndex(o => o.label === l)).filter(i => i >= 0).join('.');
+      else if (q.type === 'scale') { const s = val(a, k); if (/^[1-5]$/.test(s)) v = s; else { const i = (q.extra || []).indexOf(s); if (i >= 0) v = 'x' + i; } }
+      else if (q.type === 'grid') { const g = q.rows.map((_, i) => { const j = q.cols.indexOf(val(a, k + '_r' + (i + 1))); return j >= 0 ? String(j) : '-'; }).join(''); if (/\d/.test(g)) v = g; }
+      if (v !== '') parts.push(q.n + '-' + v);
+    });
+    return '1_' + parts.join('_');
+  }
+
+  // Never throws: anything that does not fit the survey is ignored, so a damaged link just gives a shorter kit.
+  function decode(questions, code) {
+    const out = {}, s = String(code || '');
+    if (s.slice(0, 2) !== '1_') return out;
+    s.slice(2).split('_').forEach(p => {
+      const at = p.indexOf('-'); if (at < 1) return;
+      const q = (questions || []).filter(CODED).find(x => String(x.n) === p.slice(0, at)); if (!q) return;
+      const v = p.slice(at + 1), k = 'q' + q.n;
+      if (q.type === 'single') { const o = q.options[+v]; if (/^\d+$/.test(v) && o) out[k] = o.label; }
+      else if (q.type === 'multi') { const l = v.split('.').filter(x => /^\d+$/.test(x) && q.options[+x]).map(x => q.options[+x].label); if (l.length) out[k] = l.join(' | '); }
+      else if (q.type === 'scale') { if (/^[1-5]$/.test(v)) out[k] = v; else if (/^x\d+$/.test(v) && (q.extra || [])[+v.slice(1)]) out[k] = q.extra[+v.slice(1)]; }
+      else if (q.type === 'grid') v.split('').slice(0, q.rows.length).forEach((c, i) => { if (/\d/.test(c) && q.cols[+c]) out[k + '_r' + (i + 1)] = q.cols[+c]; });
+    });
+    return out;
+  }
+
+  return { GAP, LOW, matches, build, mount, encode, decode };
 });
