@@ -51,7 +51,7 @@ test.describe('completing the survey', () => {
     await expect(page.locator('#status')).toHaveAttribute('role', 'status');
     await expect(page.locator('#steps')).toBeVisible();
     expect(ctl.bodies).toHaveLength(1);
-    expect(kinds.filter(k => k !== 'intro')).toHaveLength(24);   // 21 questions + 3 optional
+    expect(kinds.filter(k => k !== 'intro')).toHaveLength(23);   // 20 questions + 3 optional
     const payload = JSON.parse(ctl.bodies[0]);
     expect(payload).toMatchObject({ client: 'v4', hp: '', contact_email: 'a@b.co', q9: 'Scope or goals, or signing the scope document' });
     expect(payload.q10).toBeTruthy();
@@ -63,7 +63,7 @@ test.describe('completing the survey', () => {
     const ctl = await mockEndpoint(page);
     await startSurvey(page);
     const kinds = await answerAll(page, { pick: 0 });
-    expect(kinds.filter(k => k !== 'intro')).toHaveLength(23);
+    expect(kinds.filter(k => k !== 'intro')).toHaveLength(22);
     const payload = JSON.parse(ctl.bodies[0]);
     expect(payload.q9).toBe('No significant delay');
     expect(payload).not.toHaveProperty('q10');
@@ -266,7 +266,7 @@ test.describe('Operations help, resource choice and the multiple-teams note', ()
     await expect(page.locator('#ctl .opt').nth(7)).not.toHaveClass(/sel/);
   });
 
-  test('question 20 asks how likely the sponsor is to sponsor again, on a five-point scale', async ({ page }) => {
+  test('question 19 asks how likely the sponsor is to sponsor again, on a five-point scale', async ({ page }) => {
     await startSurvey(page);
     await goTo(page, /sponsor a Capstone project again/);
     await expect(page.locator('#ctl .sc')).toHaveCount(5);
@@ -280,7 +280,7 @@ test.describe('Operations help, resource choice and the multiple-teams note', ()
     await expect(page.locator('.qtext')).toContainText('one thing Capstone Operations could have done');
   });
 
-  test('question 21 is optional and asks what Operations could have done', async ({ page }) => {
+  test('question 20 is optional and asks what Operations could have done', async ({ page }) => {
     await startSurvey(page);
     await goTo(page, /one thing Capstone Operations could have done/);
     await expect(page.locator('.qhint')).toHaveText('Optional.');

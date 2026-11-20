@@ -33,7 +33,7 @@
     {
       "id": "X",
       "name": "Before you go",
-      "note": "Not counted in the 21 questions.",
+      "note": "Not counted in the 20 questions.",
       "label": "Bonus"
     }
   ],
@@ -587,35 +587,6 @@
     {
       "n": 19,
       "part": "E",
-      "text": "How would you prefer to receive it?",
-      "hint": "",
-      "type": "single",
-      "options": [
-        {
-          "label": "A Discord post when my team is confirmed",
-          "other": false
-        },
-        {
-          "label": "An email at least a week before kickoff",
-          "other": false
-        },
-        {
-          "label": "A 15-minute live walkthrough",
-          "other": false
-        },
-        {
-          "label": "A form link at kickoff",
-          "other": false
-        },
-        {
-          "label": "No preference",
-          "other": false
-        }
-      ]
-    },
-    {
-      "n": 20,
-      "part": "E",
       "text": "How likely are you to sponsor a Capstone project again?",
       "hint": "",
       "type": "scale",
@@ -626,7 +597,7 @@
       ]
     },
     {
-      "n": 21,
+      "n": 20,
       "part": "E",
       "text": "What is one thing Capstone Operations could have done to better prepare or support you before kickoff or during your first month?",
       "hint": "",

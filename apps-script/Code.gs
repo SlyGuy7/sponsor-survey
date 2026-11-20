@@ -21,7 +21,7 @@
 var SHEET_ID = 'PASTE_SHEET_ID_HERE';
 var SHEET_NAME = 'Responses';
 var MAX_LEN = 2100;       // longest allowed text value (questions allow 2000 characters)
-var MIN_MS = 8000;        // 21 questions cannot be answered faster than this by a person
+var MIN_MS = 8000;        // 20 questions cannot be answered faster than this by a person
 
 // One entry per column, in order. key = field sent by the survey, label = header shown in the sheet.
 var COLUMNS = [
@@ -222,17 +222,12 @@ var COLUMNS = [
  },
  {
   "key": "q19",
-  "label": "Q19. How would you prefer to receive it?",
-  "width": 230
- },
- {
-  "key": "q20",
-  "label": "Q20. How likely are you to sponsor a Capstone project again?",
+  "label": "Q19. How likely are you to sponsor a Capstone project again?",
   "width": 170
  },
  {
-  "key": "q21",
-  "label": "Q21. What is one thing Capstone Operations could have done to better prepare or support you before kickoff or during your first month?",
+  "key": "q20",
+  "label": "Q20. What is one thing Capstone Operations could have done to better prepare or support you before kickoff or during your first month?",
   "width": 380
  },
  {
@@ -252,7 +247,7 @@ var COLUMNS = [
  },
  {
   "key": "quote_ok",
-  "label": "May we quote Q17 and Q21 without naming you?",
+  "label": "May we quote Q17 and Q20 without naming you?",
   "width": 170
  },
  {

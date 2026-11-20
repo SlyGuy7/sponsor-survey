@@ -40,11 +40,10 @@
       .map((k, idx) => Object.assign({}, k, { idx, picked: (k.picks || []).some(p => chosen.includes(p)) }))
       .sort((x, y) => Number(y.picked) - Number(x.picked) || x.idx - y.idx)
       .map(k => Object.assign(k, { top: k.picked }));
-    const pref = val(a, 'q19');
     return {
       fix: by('fix'), refresh: by('refresh'), info: by('info'),
       dates: content.dates.filter(d => d.until >= day),
-      kit, delivery: pref && pref !== 'No preference' ? pref : '',
+      kit,
       contacts: content.contacts
     };
   }
@@ -108,7 +107,6 @@
     return [
       el('p', { class: 'pkg-ph', text: 'If you were a new sponsor' }),
       el('p', { class: 'pkg-lead', text: 'If you were starting as a new sponsor today, this is the readiness kit we would hand you. It is drafted from the Sponsor Guide and ordered by what you said would have helped you most.' }),
-      r.delivery ? el('p', { class: 'pkg-note', text: 'Noted: you would prefer to receive it as "' + r.delivery.charAt(0).toLowerCase() + r.delivery.slice(1) + '".' }) : null,
       el('h3', { text: 'Your readiness kit' }),
       r.kit.map(k => card(k, r, { open: k.top, tag: k.picked ? 'You picked this' : '' }))
     ];
@@ -143,7 +141,7 @@
 
   /* ---------- reopenable link ----------
      A sponsor's answers are turned into short option codes, such as "5-0123-1" for question 5.
-     The codes go after the # in kit.html's address, which a browser never sends to any server.
+     The codes go after the # in the kit site's address, which a browser never sends to any server.
      No names, emails or free text are included. */
   const CODED = q => q.n && q.type !== 'text' && q.type !== 'contact';
 

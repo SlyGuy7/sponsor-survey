@@ -36,7 +36,7 @@ test('phones still show which question you are on', async ({ page }) => {
   await mockEndpoint(page);
   await startSurvey(page);
   await expect(page.locator('#railCount')).toBeVisible();
-  await expect(page.locator('#railCount')).toHaveText('Question 1 of 21');
+  await expect(page.locator('#railCount')).toHaveText('Question 1 of 20');
   const box = await page.locator('#railCount').boundingBox();
   expect(box.x + box.width).toBeLessThanOrEqual(320);
 });
@@ -74,7 +74,7 @@ test('finishing a part and passing halfway are celebrated', async ({ page }) => 
   }
   expect(seen.some(t => /Part A complete/.test(t))).toBe(true);
   expect(seen.some(t => /Part B complete/.test(t))).toBe(true);
-  expect(seen.some(t => /Halfway there/.test(t))).toBe(true);          // after question 10 of 21
+  expect(seen.some(t => /Halfway there/.test(t))).toBe(true);          // after question 10 of 20
   await expect(page.locator('#toast')).toHaveAttribute('role', 'status');
 });
 

@@ -89,24 +89,21 @@ for (const scheme of ['light', 'dark']) {
   });
 }
 
-test('the thank-you screen offers a button that opens the same kit on its own page, in the same tab', async ({ page }) => {
+test('the thank-you screen offers a button that opens the kit site with a code-only link, in the same tab', async ({ page }) => {
   test.setTimeout(120000);
+  const visited = [];
+  await page.route('https://slyguy7.github.io/sponsor-kit/**', route => { visited.push(route.request().url()); return route.fulfill({ status: 200, contentType: 'text/html', body: '<!doctype html><title>kit</title>' }); });
   await finish(page);
   const btn = page.locator('#openKit');
   await expect(btn).toBeVisible();
   await expect(btn).toHaveText('Open my readiness kit');
   await expect(btn).not.toHaveAttribute('target', /./);
-  await expect(btn).toHaveAttribute('href', /^kit\.html#kit=1_[0-9a-zx._-]+$/);
+  await expect(btn).toHaveAttribute('href', /^https:\/\/slyguy7\.github\.io\/sponsor-kit\/#kit=1_[0-9a-zx._-]+$/);
   const href = await btn.getAttribute('href');
   expect(href).not.toMatch(/a@b\.co/);
   await btn.click();
-  await expect(page).toHaveURL(/kit\.html#kit=/);
-  await expect(page.locator('#pkg')).toBeVisible();
-  await expect(page.locator('#pkg h2')).toHaveText('Your sponsor readiness package');
-  await expect(page.locator('.pkg-dates li')).toHaveCount(6);
-  await expect(page.locator('#pkg')).not.toContainText('danello');
-  await page.locator('#pkgT2').click();
-  await expect(page.locator('#pkgP2 .pkg-card')).toHaveCount(6);
+  await expect(page).toHaveURL(/slyguy7\.github\.io\/sponsor-kit\/#kit=/);
+  expect(visited.length).toBeGreaterThan(0);
 });
 
 test('the kit button is hidden until the response is confirmed', async ({ page }) => {
@@ -114,23 +111,4 @@ test('the kit button is hidden until the response is confirmed', async ({ page }
   await finish(page, 'http500');
   await expect(page.locator('#doneH')).toContainText('could not confirm');
   await expect(page.locator('#openKit')).toBeHidden();
-});
-
-test('kit.html with no link or a damaged link explains itself and sends nothing', async ({ page }) => {
-  const sent = [];
-  page.on('request', r => { if (!r.url().startsWith('http://127.0.0.1') && !r.url().startsWith('http://localhost')) sent.push(r.url()); });
-  for (const hash of ['', '#kit=garbage', '#kit=1_99-1']) {
-    await page.goto('/kit.html' + hash);
-    await expect(page.locator('#kitP')).toContainText('missing or damaged');
-    await expect(page.locator('#pkg')).toBeHidden();
-    await expect(page.getByRole('link', { name: 'Take the survey' })).toBeVisible();
-  }
-  expect(sent).toEqual([]);
-});
-
-test('the kit page passes the accessibility scan', async ({ page }) => {
-  await page.goto('/kit.html#kit=1_4-0_5-0123450_8-2-3-----_14-x0_16-2_18-0.2_20-4');
-  await expect(page.locator('#pkg')).toBeVisible();
-  const r = await new AxeBuilder({ page }).analyze();
-  expect(r.violations.map(v => v.id + ': ' + v.help)).toEqual([]);
 });

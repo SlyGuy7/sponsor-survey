@@ -1,6 +1,6 @@
 # Sponsor Experience Survey
 
-A 21-question survey for project sponsors, built by the Fall 2026 NJIT capstone Operations team. It asks how prepared sponsors were before their student team began, so the next sponsor starts ready.
+A 20-question survey for project sponsors, built by the Fall 2026 NJIT capstone Operations team. It asks how prepared sponsors were before their student team began, so the next sponsor starts ready.
 
 Live site: https://slyguy7.github.io/sponsor-survey/
 
@@ -86,6 +86,8 @@ Each part of the survey has its own rail color and icon, and a short banner on i
 
 Responses are anonymous unless the respondent enters contact details on the last screens. The page is marked `noindex`. Fonts are self-hosted, so visiting the page sends nothing to Google except the answers a respondent chooses to submit.
 
-## The reopenable kit page
+## The kit site
 
-After a response is confirmed, the thank-you screen shows an "Open my readiness kit" button. It goes to `kit.html#kit=...`, where `assets/kit.js` rebuilds the same package from option codes in the address (`Readiness.encode` and `Readiness.decode` in `assets/readiness.js`). The codes sit after the `#`, which browsers never send to a server, and they contain no names, emails or free text. A missing or damaged link shows a short message instead of a kit.
+After a response is confirmed, the thank-you screen shows an "Open my readiness kit" button. It goes to a separate site, the `sponsor-kit` repository (https://slyguy7.github.io/sponsor-kit/), with the sponsor's answers as option codes after the `#` (`Readiness.encode` in `assets/readiness.js`). Browsers never send what follows the `#` to a server, and the codes contain no names, emails or free text. The kit site decodes them and builds the kit in the browser.
+
+The kit site keeps its own copy of `survey.json` and `readiness.json`. When you change a question's options or the kit content here, copy those two files into the `sponsor-kit` repository's `assets` folder too, or the link will decode differently.

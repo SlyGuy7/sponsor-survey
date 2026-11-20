@@ -6,6 +6,7 @@ const ENDPOINT = 'https://script.google.com/macros/s/AKfycbxwJBFhmA1rF7pGtUPVpPw
 const STORE = 'njit-sponsor-survey-v4';
 const PREF = 'njit-sponsor-survey-prefs';
 const TTL = 24 * 60 * 60 * 1000;          // saved progress expires after 24 hours
+const KIT_URL = 'https://slyguy7.github.io/sponsor-kit/';   // the separate kit site; it rebuilds the kit from the codes after the #
 const SEND_TIMEOUT = 20000;
 const AUTO_MS = 480;
 const TOAST_MS = 2800;
@@ -390,8 +391,8 @@ $('#printPkg').addEventListener('click', () => {
 });
 function onSuccess() {
   showPackage(lastPayload);
-  // A link that rebuilds the kit on kit.html. The answers travel only as option codes after the #, which no server receives.
-  $('#openKit').href = 'kit.html#kit=' + Readiness.encode(QS, lastPayload);
+  // A link to the kit site. The answers travel only as option codes after the #, which no server receives.
+  $('#openKit').href = KIT_URL + '#kit=' + Readiness.encode(QS, lastPayload);
   $('#kitRow').hidden = false;
   renderRecap();
   wipe(); lastPayload = null; ans = {};

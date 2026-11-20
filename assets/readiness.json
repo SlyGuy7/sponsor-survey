@@ -200,7 +200,7 @@
     },
     {
       "id": "next-open", "level": "info",
-      "when": { "key": "q20", "in": ["3", "4", "5", "Too early to say"] },
+      "when": { "key": "q19", "in": ["3", "4", "5", "Too early to say"] },
       "title": "Planning your next project",
       "body": "Dates for the next semester are not in the sponsor guide yet, and will be announced. Until then, the most useful preparation is the readiness kit: one named representative, a signed scope, data and access ready early, and the NDA completed by every team member.",
       "steps": ["Keep the contacts under Who to contact handy.", "Open the kit in the \"If you were a new sponsor\" tab and note which items you would do differently."],
@@ -208,7 +208,7 @@
     },
     {
       "id": "next-easier", "level": "refresh",
-      "when": { "key": "q20", "in": ["1", "2"] },
+      "when": { "key": "q19", "in": ["1", "2"] },
       "title": "What would make sponsoring easier",
       "body": "You said you are unlikely to sponsor again. If a specific part of the process was the problem, tell Capstone leadership directly so it can be addressed. The guide asks sponsors to raise program concerns promptly instead of waiting until the Showcase.",
       "steps": ["Note the one or two things that would change your mind.", "Send them to Dr. Eljabiri, or add them to the last survey question."],

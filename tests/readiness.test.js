@@ -99,11 +99,9 @@ test('dates: only those still ahead are listed', () => {
 });
 
 test('the new-sponsor kit puts what the sponsor picked first', () => {
-  const r = R.build(C, { q18: 'A week-by-week checklist for Sprint 1, up to the Oct 8 readiness package | A welcome post in your team\'s Discord channel', q19: 'A Discord post when my team is confirmed' }, NOV3);
+  const r = R.build(C, { q18: 'A week-by-week checklist for Sprint 1, up to the Oct 8 readiness package | A welcome post in your team\'s Discord channel' }, NOV3);
   assert.deepEqual(ids(r.kit).slice(0, 2), ['kit-sprint1', 'kit-welcome']);
   assert.deepEqual(r.kit.filter(k => k.top).map(k => k.id), ['kit-sprint1', 'kit-welcome']);
-  assert.equal(r.delivery, 'A Discord post when my team is confirmed');
-  assert.equal(R.build(C, { q19: 'No preference' }, NOV3).delivery, '');
   // a named Operations contact leads to the "who to contact" card; "None of these" keeps the default order
   assert.equal(ids(R.build(C, { q18: 'A named Operations contact and instructions for getting help' }, NOV3).kit)[0], 'kit-contacts');
   const none = R.build(C, { q18: 'None of these' }, NOV3);
@@ -123,14 +121,14 @@ test('contact details can never reach the package', () => {
 });
 
 test('a kit link carries only option codes, and decoding gives back the same kit', () => {
-  const a = { ...GOOD, q4: '2 to 3', q5_r3: 'I do not recall', q8_r2: 'Still not ready', q9: 'Not sure', q14: 'I didn’t need help', q16: '2', q18: 'A pre-kickoff checklist of what to prepare (scope, data, access, contact)', q20: 'Too early to say', contact_name: 'Pat Example', contact_email: 'pat@acme.test', q21: 'free text here' };
+  const a = { ...GOOD, q4: '2 to 3', q5_r3: 'I do not recall', q8_r2: 'Still not ready', q9: 'Not sure', q14: 'I didn’t need help', q16: '2', q18: 'A pre-kickoff checklist of what to prepare (scope, data, access, contact)', q19: 'Too early to say', contact_name: 'Pat Example', contact_email: 'pat@acme.test', q20: 'free text here' };
   const code = R.encode(S.questions, a);
   assert.match(code, /^1_[0-9a-zx._-]+$/);
   for (const s of ['Pat', 'acme', 'free text', 'Still']) assert.ok(!code.includes(s), s);
   const back = R.decode(S.questions, code);
-  for (const k of ['q4', 'q5_r3', 'q8_r2', 'q9', 'q14', 'q16', 'q18', 'q20']) assert.equal(back[k], String(a[k]), k);
+  for (const k of ['q4', 'q5_r3', 'q8_r2', 'q9', 'q14', 'q16', 'q18', 'q19']) assert.equal(back[k], String(a[k]), k);
   assert.equal(back.contact_email, undefined);
-  assert.equal(back.q21, undefined);
+  assert.equal(back.q20, undefined);
   assert.deepEqual(ids(R.build(C, back, NOV3).fix), ids(R.build(C, a, NOV3).fix));
 });
 
@@ -142,7 +140,7 @@ test('a damaged kit link never throws and never invents answers', () => {
 });
 
 test('how likely a sponsor is to sponsor again changes the kit, and never mentions money', () => {
-  const low = R.build(C, { ...GOOD, q20: '2' }, NOV3), high = R.build(C, { ...GOOD, q20: '5' }, NOV3);
+  const low = R.build(C, { ...GOOD, q19: '2' }, NOV3), high = R.build(C, { ...GOOD, q19: '5' }, NOV3);
   assert.ok(ids(low.refresh).includes('next-easier') && !ids(low.info).includes('next-open'));
   assert.ok(ids(high.info).includes('next-open') && !ids(high.refresh).includes('next-easier'));
   assert.ok(!/\$|contribution|donat|foundation/i.test(JSON.stringify(C)), 'the kit must not mention money');
