@@ -3,7 +3,9 @@
  *
  * Setup
  *  1. Create a Google Sheet (keep it PRIVATE: share only with the Operations team and the professor).
- *  2. Extensions > Apps Script, paste this file, set SHEET_ID below, and save.
+ *  2. Extensions > Apps Script, paste this file and save. Then open Project Settings (gear icon) >
+ *     Script Properties > Add script property: name SHEET_ID, value = the long ID in the Sheet's
+ *     address (between /d/ and /edit). Saved there, it survives pasting a new version of this file.
  *  3. Deploy > New deployment > Web app. Execute as: Me. Who has access: Anyone.
  *  4. Copy the /exec URL into ENDPOINT in assets/app.js.
  *  5. Open the /exec URL in a private window: you should see {"ok":true,"service":"sponsor-survey"}.
@@ -18,7 +20,15 @@
  * Results dashboard: run createDashboardKey once (open View > Logs or the Execution log to read the key),
  * then open dashboard.html on your site and paste the key. Run it again to replace the key.
  */
+// Fallback only. Keep the real ID in Script Properties (see Setup, step 2) so a fresh paste never wipes it,
+// and never commit the real ID to the repository.
 var SHEET_ID = 'PASTE_SHEET_ID_HERE';
+
+// The Sheet ID from Script Properties, or the value above. Empty when neither has been set.
+function sheetId_() {
+  var id = PropertiesService.getScriptProperties().getProperty('SHEET_ID') || SHEET_ID;
+  return id && id !== 'PASTE_SHEET_ID_HERE' ? String(id).trim() : '';
+}
 var SHEET_NAME = 'Responses';
 var MAX_LEN = 2100;       // longest allowed text value (questions allow 2000 characters)
 var MIN_MS = 8000;        // 20 questions cannot be answered faster than this by a person
@@ -302,7 +312,7 @@ function setupSheet_(sheet) {
 }
 
 function getSheet_() {
-  var ss = SpreadsheetApp.openById(SHEET_ID);
+  var ss = SpreadsheetApp.openById(sheetId_());
   var sheet = ss.getSheetByName(SHEET_NAME);
   if (sheet && sheet.getLastRow() > 0) {
     var have = sheet.getRange(1, 1, 1, HEADERS.length).getValues()[0].join('|');
@@ -329,7 +339,7 @@ function createDashboardKey() {
 }
 
 function summary_() {
-  var sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(SHEET_NAME);
+  var sheet = SpreadsheetApp.openById(sheetId_()).getSheetByName(SHEET_NAME);
   if (!sheet || sheet.getLastRow() < 2) return { ok: true, count: 0, rows: [] };
   var have = sheet.getRange(1, 1, 1, HEADERS.length).getValues()[0].join('|');
   if (have !== HEADERS.join('|')) return { ok: false, error: 'unexpected layout' };
@@ -366,6 +376,7 @@ function doPost(e) {
     // Bots: honeypot filled or impossibly fast. Pretend success so they learn nothing.
     if (d.hp || (Number(d.elapsedMs) || 0) < MIN_MS) return json_({ ok: true });
 
+    if (!sheetId_()) return json_({ ok: false, error: 'not configured: set SHEET_ID in Script Properties' });
     var sheet = getSheet_();
 
     // De-duplicate: a retry carries the same submissionId.

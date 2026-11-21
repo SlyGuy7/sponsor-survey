@@ -9,8 +9,9 @@ const crypto = require('crypto');
 const code = fs.readFileSync(path.join(__dirname, '..', 'apps-script', 'Code.gs'), 'utf8');
 const chain = () => new Proxy(function () {}, { get: (t, p) => (p === 'then' ? undefined : () => chain()), apply: () => chain() });
 
-function load({ existingHeader } = {}) {
-  const state = { rows: existingHeader ? [existingHeader, ['old', 'row']] : [], renamed: null, created: 0, props: {}, logged: [] };
+// sheetId: what is saved in Script Properties (null = nothing saved). src: the script text, to test edits to it.
+function load({ existingHeader, sheetId = 'test-sheet-id', src = code } = {}) {
+  const state = { rows: existingHeader ? [existingHeader, ['old', 'row']] : [], renamed: null, created: 0, props: sheetId ? { SHEET_ID: sheetId } : {}, logged: [], openedId: null };
   const makeSheet = () => ({
     getLastRow: () => state.rows.length,
     appendRow: r => state.rows.push(r),
@@ -31,7 +32,7 @@ function load({ existingHeader } = {}) {
     ContentService: { MimeType: { JSON: 'json' }, createTextOutput: t => ({ t, setMimeType() { return this; } }) },
     SpreadsheetApp: {
       BandingTheme: { LIGHT_GREY: 'g' },
-      openById: () => ({
+      openById: id => (state.openedId = id, {
         getSheetByName: () => sheet,
         insertSheet: () => { state.created++; state.rows = []; sheet = makeSheet(); return sheet; },
       }),
@@ -42,7 +43,7 @@ function load({ existingHeader } = {}) {
     Date, JSON, String, Number, Math,
   };
   vm.createContext(ctx);
-  new vm.Script(code).runInContext(ctx);
+  new vm.Script(src).runInContext(ctx);
   const post = o => JSON.parse(ctx.doPost({ postData: { contents: typeof o === 'string' ? o : JSON.stringify(o) } }).t);
   return { ctx, state, post };
 }
@@ -167,4 +168,26 @@ test('dashboard: plain doGet still just reports the service is up', () => {
   const { ctx } = load();
   assert.deepStrictEqual(get(ctx, {}), { ok: true, service: 'sponsor-survey' });
   assert.deepStrictEqual(JSON.parse(ctx.doGet().t), { ok: true, service: 'sponsor-survey' });
+});
+
+test('the Sheet ID comes from Script Properties, so pasting a new version of the script never loses it', () => {
+  const { state, post } = load({ sheetId: 'id-from-properties' });
+  assert.deepStrictEqual(post(base), { ok: true });
+  assert.strictEqual(state.openedId, 'id-from-properties');
+  assert.strictEqual(state.rows.length, 2);
+});
+
+test('the SHEET_ID line in the script still works as a fallback', () => {
+  const src = code.replace("var SHEET_ID = 'PASTE_SHEET_ID_HERE';", "var SHEET_ID = 'id-in-the-file';");
+  const { state, post } = load({ sheetId: null, src });
+  assert.deepStrictEqual(post(base), { ok: true });
+  assert.strictEqual(state.openedId, 'id-in-the-file');
+});
+
+test('with no Sheet ID anywhere, a submission is refused with a clear reason and nothing is opened', () => {
+  const { state, post } = load({ sheetId: null });
+  const out = post(base);
+  assert.strictEqual(out.ok, false);
+  assert.match(out.error, /SHEET_ID/);
+  assert.strictEqual(state.openedId, null);
 });
