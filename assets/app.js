@@ -376,7 +376,7 @@ function renderRecap() {
 let READINESS = null;
 async function showPackage(data) {
   try {
-    if (!READINESS) { const r = await fetch('assets/readiness.json'); if (!r.ok) throw new Error(r.status); READINESS = await r.json(); }
+    if (!READINESS) { const r = await fetch('assets/readiness.json?v=845cbed318'); if (!r.ok) throw new Error(r.status); READINESS = await r.json(); }
     Readiness.mount(READINESS, data, $('#pkgBody'));
     $('#pkg').hidden = false;
   } catch (e) { $('#pkg').hidden = true; }
@@ -494,7 +494,7 @@ async function boot() {
   history.replaceState(null, '', location.pathname + location.search);
   setQuick(quick);
   try {
-    const res = await fetch('assets/survey.json', { cache: 'no-cache' });
+    const res = await fetch('assets/survey.json?v=0af6e9049d', { cache: 'no-cache' });
     if (!res.ok) throw new Error(res.status);
     DATA = await res.json();
   } catch (e) { $('#loadErr').hidden = false; return; }

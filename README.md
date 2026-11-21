@@ -59,6 +59,7 @@ Everything below is for the team that runs and updates the survey.
 | `_redirects` | Path rewrites for the Cloudflare Pages backup copy |
 | `dashboard.html`, `assets/dashboard.js`, `assets/dashboard.css` | Private results page for the team (see below) |
 | `docs/screenshots/` | The images in this README |
+| `scripts/stamp.js` | Adds the version tags to file links (`npm run stamp`, see "Publishing an update") |
 | `tests/`, `package.json`, `playwright.config.js`, `.github/workflows/test.yml` | Automated tests and the workflow that runs them |
 
 ## Run it on your computer
@@ -68,6 +69,18 @@ npm run serve
 ```
 
 Open http://127.0.0.1:4173/. To test failure handling without touching the real sheet, point `ENDPOINT` in `assets/app.js` at a local mock that returns `{"ok":true}`, an HTTP 500 or nothing, and change it back before you commit.
+
+## Publishing an update
+
+After changing any file in `assets/` (or `index.html`, `dashboard.html`, `404.html`), run:
+
+```
+npm run stamp
+```
+
+This gives each CSS, JS and JSON file a version tag taken from its contents (`style.css?v=d983cada35`). Browsers keep files for up to 10 minutes, so without the tags a visitor could load a new page with an old script, or an old script with new questions. With them, every visitor gets a matching set: the old version until their page refreshes, then the new one, never a mix. `npm test` (and the Tests workflow on GitHub) fails with "Run: npm run stamp" if a tag is out of date.
+
+Both hosts switch to a new version all at once, so the site never goes down during a deploy. To keep a broken version from going live, merge into `main` through a pull request and wait for the green tick first.
 
 ## Change a question
 

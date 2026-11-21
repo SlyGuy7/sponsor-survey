@@ -5,10 +5,11 @@
   "description": "Sponsor Experience Survey: static site plus automated tests",
   "scripts": {
     "serve": "node serve.js 4173",
-    "test": "node --test tests/appsscript.test.js tests/readiness.test.js && playwright test",
+    "test": "node scripts/stamp.js --check && node --test tests/appsscript.test.js tests/readiness.test.js && playwright test",
     "test:ui": "playwright test",
-    "test:script": "node --test tests/appsscript.test.js tests/readiness.test.js",
-    "lighthouse": "node tests/lighthouse-check.js"
+    "test:script": "node scripts/stamp.js --check && node --test tests/appsscript.test.js tests/readiness.test.js",
+    "lighthouse": "node tests/lighthouse-check.js",
+    "stamp": "node scripts/stamp.js"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.10.2",
