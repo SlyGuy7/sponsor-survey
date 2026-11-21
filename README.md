@@ -91,16 +91,17 @@ Edit `assets/survey.json`. Question types: `single`, `multi`, `scale`, `grid`, `
 ## Set up the response collector (first time only)
 
 1. Create a Google Sheet and keep it private (share only with the Operations team and the professor).
-2. In the sheet, open Extensions > Apps Script and paste `apps-script/Code.gs`. Set `SHEET_ID`. Never commit the real ID; the repo copy keeps `PASTE_SHEET_ID_HERE`.
-3. Deploy > New deployment > Web app. Execute as: Me. Who has access: Anyone.
-4. Copy the `/exec` URL into `ENDPOINT` at the top of `assets/app.js`, run `npm run stamp`, and publish the site.
-5. Open the `/exec` URL in a browser. You should see `{"ok":true,"service":"sponsor-survey"}`.
+2. In the sheet, open Extensions > Apps Script, paste `apps-script/Code.gs` and save.
+3. Still in Apps Script, open Project Settings (the gear icon) > Script Properties > Add script property. Name: `SHEET_ID`. Value: the long ID in the Sheet's address, between `/d/` and `/edit`. Save. Kept there, the ID survives every future paste of `Code.gs`. Never commit the real ID; the repo copy keeps `PASTE_SHEET_ID_HERE`.
+4. Deploy > New deployment > Web app. Execute as: Me. Who has access: Anyone.
+5. Copy the `/exec` URL into `ENDPOINT` at the top of `assets/app.js`, run `npm run stamp`, and publish the site.
+6. Open the `/exec` URL in a browser. You should see `{"ok":true,"service":"sponsor-survey"}`.
 
 ## Update the response collector (no downtime)
 
 After editing `Code.gs`, update the **existing** deployment. Do not use "New deployment": that creates a new `/exec` URL, and the live survey keeps sending answers to the old URL, which still runs the old code, until `ENDPOINT` is changed and the site is republished.
 
-1. Paste the new `Code.gs` into the Apps Script editor and save.
+1. Paste the new `Code.gs` into the Apps Script editor and save. The Sheet ID stays in Script Properties, so there is nothing to re-enter. (If the survey says "We could not confirm delivery" after an update, check that Project Settings > Script Properties still has `SHEET_ID`.)
 2. Optional but recommended: Deploy > Test deployments gives a `/dev` URL that runs the saved code. Open it to check it still says `{"ok":true,"service":"sponsor-survey"}`. Only editors of the script can open it.
 3. Deploy > Manage deployments > select the web app > pencil icon (Edit) > Version: **New version** > Deploy.
 4. Open the `/exec` URL. It should still say `{"ok":true,"service":"sponsor-survey"}`. The URL has not changed, so nothing on the site needs updating, and the next answer a sponsor sends goes to the new code.
