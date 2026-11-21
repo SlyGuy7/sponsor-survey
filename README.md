@@ -88,14 +88,26 @@ The 20 questions are frozen while responses are coming in: changing any wording,
 
 Edit `assets/survey.json`. Question types: `single`, `multi`, `scale`, `grid`, `text`, `contact`. An option with `"skipTo": 12` skips questions numbered below 12. An option with `"exclusive": true` clears the other choices in a multi-select, and `"max": 2` on a multi-select limits how many answers can be chosen. Set `config.contactEmail` to show a contact link on the welcome and thank-you pages.
 
-## Set up or redeploy the response collector
+## Set up the response collector (first time only)
 
 1. Create a Google Sheet and keep it private (share only with the Operations team and the professor).
 2. In the sheet, open Extensions > Apps Script and paste `apps-script/Code.gs`. Set `SHEET_ID`. Never commit the real ID; the repo copy keeps `PASTE_SHEET_ID_HERE`.
 3. Deploy > New deployment > Web app. Execute as: Me. Who has access: Anyone.
-4. Copy the `/exec` URL into `ENDPOINT` at the top of `assets/app.js`.
+4. Copy the `/exec` URL into `ENDPOINT` at the top of `assets/app.js`, run `npm run stamp`, and publish the site.
 5. Open the `/exec` URL in a browser. You should see `{"ok":true,"service":"sponsor-survey"}`.
-6. After every edit to `Code.gs`, deploy a **new version**; the old URL keeps running the old code.
+
+## Update the response collector (no downtime)
+
+After editing `Code.gs`, update the **existing** deployment. Do not use "New deployment": that creates a new `/exec` URL, and the live survey keeps sending answers to the old URL, which still runs the old code, until `ENDPOINT` is changed and the site is republished.
+
+1. Paste the new `Code.gs` into the Apps Script editor and save.
+2. Optional but recommended: Deploy > Test deployments gives a `/dev` URL that runs the saved code. Open it to check it still says `{"ok":true,"service":"sponsor-survey"}`. Only editors of the script can open it.
+3. Deploy > Manage deployments > select the web app > pencil icon (Edit) > Version: **New version** > Deploy.
+4. Open the `/exec` URL. It should still say `{"ok":true,"service":"sponsor-survey"}`. The URL has not changed, so nothing on the site needs updating, and the next answer a sponsor sends goes to the new code.
+
+If something is wrong, roll back the same way: Manage deployments > pencil icon > pick the previous version > Deploy.
+
+When a change touches both the script and the site, deploy the script first and make it accept both the old and the new answers, then publish the site. Sponsors who already have the old page open keep sending the old format for a while.
 
 The script ignores unknown fields, caps text length, prefixes values that start with `=`, `+`, `-` or `@` so a sheet never runs them as formulas, rejects honeypot and impossibly fast submissions, de-duplicates retries by `submissionId`, and serializes writes with a lock.
 
@@ -141,7 +153,7 @@ The kit site keeps its own copy of `survey.json` and `readiness.json`. When you 
 2. Open `https://slyguy7.github.io/sponsor-survey/dashboard.html` and paste the key into the form. Tick "Remember on this device" to skip this step next time in that browser; "Forget this device" removes it again. Do not tick it on a shared computer. A link ending in `#key=YOUR_KEY` also works; the key is removed from the address bar as soon as the page reads it and a link never saves it.
 3. Share the key only with the Operations team and the professor, and never commit it or paste it into a file. To replace it, run `createDashboardKey` again; the old key stops working immediately, and any browser that remembered it asks for the new one.
 
-The script never returns names, organizations, emails or submission IDs, so they cannot appear on the dashboard or in its CSV. Redeploy the script (new version) after updating `Code.gs`.
+The script never returns names, organizations, emails or submission IDs, so they cannot appear on the dashboard or in its CSV. After updating `Code.gs`, follow "Update the response collector (no downtime)" above.
 
 ## Privacy
 
