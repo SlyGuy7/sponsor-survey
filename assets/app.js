@@ -59,7 +59,9 @@ const partOf = id => PARTS.find(p => p.id === id);
 const optOf = (q, a) => q.options && a && q.options.find(o => o.label === a.v);
 
 // A question is skipped when an earlier answer chose an option with skipTo > this question's number.
+// The results-summary question is skipped when no email was given, since there is nowhere to send it.
 function skipped(q) {
+  if (q.bonus === 3) return !EMAIL.test(String((ans.contact && ans.contact.email) || '').trim());
   if (!q.n) return false;
   return QS.some(p => p.n && p.n < q.n && p.type === 'single' && ans[p.key] && (() => {
     const o = optOf(p, ans[p.key]);
@@ -376,7 +378,7 @@ function renderRecap() {
 let READINESS = null;
 async function showPackage(data) {
   try {
-    if (!READINESS) { const r = await fetch('assets/readiness.json?v=845cbed318'); if (!r.ok) throw new Error(r.status); READINESS = await r.json(); }
+    if (!READINESS) { const r = await fetch('assets/readiness.json?v=463ac718df'); if (!r.ok) throw new Error(r.status); READINESS = await r.json(); }
     Readiness.mount(READINESS, data, $('#pkgBody'));
     $('#pkg').hidden = false;
   } catch (e) { $('#pkg').hidden = true; }
@@ -494,7 +496,7 @@ async function boot() {
   history.replaceState(null, '', location.pathname + location.search);
   setQuick(quick);
   try {
-    const res = await fetch('assets/survey.json?v=0af6e9049d', { cache: 'no-cache' });
+    const res = await fetch('assets/survey.json?v=17d33fc0b7', { cache: 'no-cache' });
     if (!res.ok) throw new Error(res.status);
     DATA = await res.json();
   } catch (e) { $('#loadErr').hidden = false; return; }

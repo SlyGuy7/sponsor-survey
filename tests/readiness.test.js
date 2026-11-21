@@ -43,15 +43,15 @@ test('items are well formed and ids are unique', () => {
     assert.ok(i.title && i.body && i.source, i.id);
     for (const u of i.unless || []) assert.ok(ids.includes(u), i.id + ' unless ' + u);
   }
-  const q18 = S.questions.find(q => q.n === 18);
-  const labels = q18.options.map(o => o.label);
+  const q19 = S.questions.find(q => q.n === 19);
+  const labels = q19.options.map(o => o.label);
   for (const k of C.kit) {
     assert.ok(k.title && k.source, k.id);
     assert.ok(k.picks && k.picks.length, k.id + ' needs picks');
-    for (const p of k.picks) assert.ok(labels.includes(p), `${k.id}: question 18 has no answer "${p}"`);
+    for (const p of k.picks) assert.ok(labels.includes(p), `${k.id}: question 19 has no answer "${p}"`);
   }
-  // every real choice in question 18 leads to a kit item ("None of these" is the only one that does not)
-  for (const o of q18.options.filter(o => !o.exclusive)) assert.ok(C.kit.some(k => k.picks.includes(o.label)), 'no kit item for: ' + o.label);
+  // every real choice in question 19 leads to a kit item ("None of these" is the only one that does not)
+  for (const o of q19.options.filter(o => !o.exclusive)) assert.ok(C.kit.some(k => k.picks.includes(o.label)), 'no kit item for: ' + o.label);
   for (const d of C.dates) assert.match(d.until, /^\d{4}-\d{2}-\d{2}$/);
 });
 
@@ -59,7 +59,7 @@ const NOV3 = new Date(2026, 10, 3);
 const ids = l => l.map(i => i.id);
 // answers with nothing wrong
 const GOOD = { q4: '2 to 3', q5_r1: '5', q5_r2: '5', q5_r3: '5', q5_r4: '5', q5_r5: '5', q5_r6: '5', q5_r7: '5', q6: 'I read it closely',
-  q8_r1: 'Ready before Sprint 1 (by Sept 28)', q8_r2: 'Ready during Sprint 1 (by Oct 8)', q8_r3: 'Not needed for our project', q11: 'From the first team meeting', q12: 'Weekly or more', q13: 'No', q14: 5, q15: 'About what I expected', q16: 4 };
+  q8_r1: 'Ready before Sprint 1 (by Sept 28)', q8_r2: 'Ready during Sprint 1 (by Oct 8)', q8_r3: 'Not needed for our project', q11: '1 to 2 hours', q12: 'Weekly or more', q13: 'No', q14: 5, q15: 'About what I expected', q16: 4 };
 
 test('a sponsor with nothing wrong gets no "needs attention" items', () => {
   const r = R.build(C, GOOD, NOV3);
@@ -99,12 +99,12 @@ test('dates: only those still ahead are listed', () => {
 });
 
 test('the new-sponsor kit puts what the sponsor picked first', () => {
-  const r = R.build(C, { q18: 'A week-by-week checklist for Sprint 1, up to the Oct 8 readiness package | A welcome post in your team\'s Discord channel' }, NOV3);
+  const r = R.build(C, { q19: 'A week-by-week checklist for Sprint 1, up to the Oct 8 readiness package | A welcome post in your team\'s Discord channel' }, NOV3);
   assert.deepEqual(ids(r.kit).slice(0, 2), ['kit-sprint1', 'kit-welcome']);
   assert.deepEqual(r.kit.filter(k => k.top).map(k => k.id), ['kit-sprint1', 'kit-welcome']);
   // a named Operations contact leads to the "who to contact" card; "None of these" keeps the default order
-  assert.equal(ids(R.build(C, { q18: 'A named Operations contact and instructions for getting help' }, NOV3).kit)[0], 'kit-contacts');
-  const none = R.build(C, { q18: 'None of these' }, NOV3);
+  assert.equal(ids(R.build(C, { q19: 'A named Operations contact and instructions for getting help' }, NOV3).kit)[0], 'kit-contacts');
+  const none = R.build(C, { q19: 'None of these' }, NOV3);
   assert.deepEqual(ids(none.kit), C.kit.map(k => k.id));
   assert.equal(none.kit.some(k => k.top), false);
 });
@@ -121,7 +121,7 @@ test('contact details can never reach the package', () => {
 });
 
 test('a kit link carries only option codes, and decoding gives back the same kit', () => {
-  const a = { ...GOOD, q4: '2 to 3', q5_r3: 'I do not recall', q8_r2: 'Still not ready', q9: 'Not sure', q14: 'I didn’t need help', q16: '2', q18: 'A pre-kickoff checklist of what to prepare (scope, data, access, contact)', q19: 'Too early to say', contact_name: 'Pat Example', contact_email: 'pat@acme.test', q20: 'free text here' };
+  const a = { ...GOOD, q4: '2 to 3', q5_r3: 'I do not recall', q8_r2: 'Still not ready', q9: 'Not sure', q14: 'I didn’t need help', q16: '2', q18: 'Too early to say', q19: 'A pre-kickoff checklist of what to prepare (scope, data, access, contact)', contact_name: 'Pat Example', contact_email: 'pat@acme.test', q20: 'free text here' };
   const code = R.encode(S.questions, a);
   assert.match(code, /^1_[0-9a-zx._-]+$/);
   for (const s of ['Pat', 'acme', 'free text', 'Still']) assert.ok(!code.includes(s), s);
@@ -140,7 +140,7 @@ test('a damaged kit link never throws and never invents answers', () => {
 });
 
 test('how likely a sponsor is to sponsor again changes the kit, and never mentions money', () => {
-  const low = R.build(C, { ...GOOD, q19: '2' }, NOV3), high = R.build(C, { ...GOOD, q19: '5' }, NOV3);
+  const low = R.build(C, { ...GOOD, q18: '2' }, NOV3), high = R.build(C, { ...GOOD, q18: '5' }, NOV3);
   assert.ok(ids(low.refresh).includes('next-easier') && !ids(low.info).includes('next-open'));
   assert.ok(ids(high.info).includes('next-open') && !ids(high.refresh).includes('next-easier'));
   assert.ok(!/\$|contribution|donat|foundation/i.test(JSON.stringify(C)), 'the kit must not mention money');

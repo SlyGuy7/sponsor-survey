@@ -53,7 +53,7 @@ test.describe('completing the survey', () => {
     expect(ctl.bodies).toHaveLength(1);
     expect(kinds.filter(k => k !== 'intro')).toHaveLength(23);   // 20 questions + 3 optional
     const payload = JSON.parse(ctl.bodies[0]);
-    expect(payload).toMatchObject({ client: 'v4', hp: '', contact_email: 'a@b.co', q9: 'Scope or goals, or signing the scope document' });
+    expect(payload).toMatchObject({ client: 'v4', hp: '', contact_email: 'a@b.co', q9: 'Unclear scope or goals', results_ok: 'No' });   // email given, so the results question was asked
     expect(payload.q10).toBeTruthy();
     expect(payload.elapsedMs).toBeGreaterThan(0);
     expect(await page.evaluate(() => localStorage.getItem('njit-sponsor-survey-v4'))).toBeNull();
@@ -76,7 +76,7 @@ test.describe('completing the survey', () => {
     await expect(last).toContainText('Not sure');
     await last.click();
     await page.click('#next');
-    await expect(page.locator('.qtext')).toContainText('named day-to-day contact');   // question 10 was skipped
+    await expect(page.locator('.qtext')).toContainText('hours a week');   // question 10 was skipped
     await page.click('#back');
     await expect(page.locator('.qtext')).toContainText('longest delay');
     await page.waitForTimeout(500);
@@ -148,7 +148,7 @@ test.describe('validation', () => {
     await expect(QUESTION(page)).toContainText('organization');
   });
 
-  test('multi-select: "I never received this information" excludes the others', async ({ page }) => {
+  test('multi-select: "I never received this information" excludes the others, "I figured it out" does not', async ({ page }) => {
     await startSurvey(page);
     for (let i = 0; i < 40 && !(await page.locator('#ctl input[type=checkbox]').count()); i++) {
       await require('./helpers').answerCurrent(page); await page.waitForTimeout(120); await page.click('#next'); await page.waitForTimeout(250);
@@ -156,7 +156,11 @@ test.describe('validation', () => {
     const opts = page.locator('#ctl .opt');
     await opts.nth(0).click(); await opts.nth(1).click();
     expect(await page.locator('#ctl .opt.sel').count()).toBe(2);
-    await opts.nth(6).click();
+    await expect(opts.nth(6)).toContainText('I figured it out as the project went');
+    await opts.nth(6).click();                                               // can be combined with other sources
+    expect(await page.locator('#ctl .opt.sel').count()).toBe(3);
+    await expect(opts.nth(7)).toContainText('I never received this information');
+    await opts.nth(7).click();
     expect(await page.locator('#ctl .opt.sel').count()).toBe(1);
     await opts.nth(0).click();
     expect(await page.locator('#ctl .opt.sel').count()).toBe(1);
@@ -243,7 +247,7 @@ test.describe('Operations help, resource choice and the multiple-teams note', ()
     await expect(page.locator('.qtext')).toContainText('time this project asked of you');
   });
 
-  test('question 18: at most two resources, and "None of these" stands alone', async ({ page }) => {
+  test('question 19: at most two resources, and "None of these" stands alone', async ({ page }) => {
     const ctl = await mockEndpoint(page);
     await startSurvey(page);
     await goTo(page, /Which resources would have helped you most/);
@@ -266,9 +270,11 @@ test.describe('Operations help, resource choice and the multiple-teams note', ()
     await expect(page.locator('#ctl .opt').nth(7)).not.toHaveClass(/sel/);
   });
 
-  test('question 19 asks how likely the sponsor is to sponsor again, on a five-point scale', async ({ page }) => {
+  test('question 18 asks how likely the sponsor is to sponsor again, on a five-point scale, in Part D', async ({ page }) => {
     await startSurvey(page);
     await goTo(page, /sponsor a Capstone project again/);
+    await expect(page.locator('#q')).toHaveAttribute('data-part', 'D');
+    await expect(page.locator('#railCount')).toHaveText('Question 18 of 20');
     await expect(page.locator('#ctl .sc')).toHaveCount(5);
     await expect(page.locator('.scale-lbl')).toContainText('1 = Very unlikely');
     await expect(page.locator('.scale-lbl')).toContainText('5 = Very likely');
@@ -277,7 +283,25 @@ test.describe('Operations help, resource choice and the multiple-teams note', ()
     await expect(page.locator('#err')).not.toBeEmpty();
     await page.locator('#ctl .extra .opt').first().click();
     await page.click('#next');
-    await expect(page.locator('.qtext')).toContainText('one thing Capstone Operations could have done');
+    await expect(page.locator('#q')).toHaveAttribute('data-part', 'E');
+    await expect(page.locator('.qtext')).toContainText('Which resources would have helped you most');
+  });
+
+  test('question 10 (the wait) stays in Part B with question 9', async ({ page }) => {
+    await startSurvey(page);
+    await goTo(page, /how long did the team wait/);
+    await expect(page.locator('#q')).toHaveAttribute('data-part', 'B');
+    await expect(page.locator('.part-banner')).toHaveCount(0);
+  });
+
+  test('the results-summary question only appears when an email was given', async ({ page }) => {
+    const ctl = await mockEndpoint(page);
+    await startSurvey(page);
+    const kinds = await answerAll(page, { pick: 1, email: '' });
+    expect(kinds.filter(k => k !== 'intro')).toHaveLength(22);          // 20 questions + contact + quote; no results question
+    const payload = JSON.parse(ctl.bodies[0]);
+    expect(payload).not.toHaveProperty('results_ok');
+    expect(payload).toHaveProperty('quote_ok');
   });
 
   test('question 20 is optional and asks what Operations could have done', async ({ page }) => {

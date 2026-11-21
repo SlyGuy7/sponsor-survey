@@ -63,7 +63,7 @@
     },
     {
       "id": "gap-contact", "level": "fix",
-      "when": { "any": [ { "gap": "q8_r7" }, { "key": "q11", "in": ["After Sprint 1", "Not yet"] } ] },
+      "when": { "gap": "q8_r7" },
       "title": "Name a technical contact for the team",
       "body": "Your answers show the team got a named technical contact late, or still has none. Students need someone who can answer technical and domain questions. The guide asks sponsors to provide contacts, constraints and decisions early.",
       "steps": ["Pick someone who can answer the team's technical questions.", "Introduce them to the PM and the team."],
@@ -84,9 +84,9 @@
       "source": "Sponsor Guide, FAQ 16"
     },
     {
-      "id": "scope-undocumented", "level": "fix", "key": "q13", "in": ["A major change, not documented"],
+      "id": "scope-undocumented", "level": "fix", "key": "q13", "in": ["Small changes, not agreed with the Project Manager", "A major change, not documented"],
       "title": "Document your scope change with the PM",
-      "body": "You told us the scope changed in a major way without being documented. The guide allows scope changes when needed, but they should be documented with the PM and stay realistic within the five-sprint schedule. Large late expansions are best avoided.",
+      "body": "You told us the scope changed without being agreed or documented with the PM. The guide allows scope changes when needed, but they should be documented with the PM and stay realistic within the five-sprint schedule. Large late expansions are best avoided.",
       "steps": ["Write a short note on what changed and why.", "Send it to the PM so the team's plan and scope document are updated."],
       "source": "Sponsor Guide, section 5, and FAQ 5"
     },
@@ -164,7 +164,7 @@
     },
     {
       "id": "guide-missing", "level": "refresh",
-      "when": { "any": [ { "key": "q6", "in": ["I received it but did not open it", "I never received it", "I did not know it existed"] }, { "key": "q7", "has": "I never received this information" } ] },
+      "when": { "any": [ { "key": "q6", "in": ["I received it but did not open it", "I never received it or did not know it existed"] }, { "key": "q7", "has": "I never received this information" } ] },
       "title": "Get the Sponsor Partnership Guide & FAQ",
       "body": "The guide is a sponsor-only companion covering the calendar, scope and readiness rules, communication, how teams are evaluated and a sponsor FAQ. Your signed agreement and the live course schedule take priority if any wording differs.",
       "steps": ["Ask your PM or your Capstone contact for the current copy."],
@@ -200,7 +200,7 @@
     },
     {
       "id": "next-open", "level": "info",
-      "when": { "key": "q19", "in": ["3", "4", "5", "Too early to say"] },
+      "when": { "key": "q18", "in": ["3", "4", "5", "Too early to say"] },
       "title": "Planning your next project",
       "body": "Dates for the next semester are not in the sponsor guide yet, and will be announced. Until then, the most useful preparation is the readiness kit: one named representative, a signed scope, data and access ready early, and the NDA completed by every team member.",
       "steps": ["Keep the contacts under Who to contact handy.", "Look through the new-sponsor kit and note which items you would do differently."],
@@ -208,7 +208,7 @@
     },
     {
       "id": "next-easier", "level": "refresh",
-      "when": { "key": "q19", "in": ["1", "2"] },
+      "when": { "key": "q18", "in": ["1", "2"] },
       "title": "What would make sponsoring easier",
       "body": "You said you are unlikely to sponsor again. If a specific part of the process was the problem, tell Capstone leadership directly so it can be addressed. The guide asks sponsors to raise program concerns promptly instead of waiting until the Showcase.",
       "steps": ["Note the one or two things that would change your mind.", "Send them to Dr. Eljabiri, or add them to the last survey question."],
@@ -259,7 +259,7 @@
       "source": "Sponsor Guide, sections 2 and 6"
     },
     {
-      "id": "kit-summary", "picks": ["A one-page summary of the Sponsor Guide"],
+      "id": "kit-summary", "picks": ["A one-page summary of the Sponsor Partnership Guide & FAQ"],
       "title": "One-page summary of the Sponsor Guide",
       "intro": "The essentials in one place.",
       "steps": [

@@ -43,9 +43,9 @@ async function load() {
   const key = KEY;
   msg('Loading results…');
   try {
-    if (!SURVEY) { const r = await fetch('assets/survey.json?v=0af6e9049d', { cache: 'no-cache' }); SURVEY = await r.json(); SURVEY.questions.forEach(q => { q.key = keyOf(q); }); }
+    if (!SURVEY) { const r = await fetch('assets/survey.json?v=17d33fc0b7', { cache: 'no-cache' }); SURVEY = await r.json(); SURVEY.questions.forEach(q => { q.key = keyOf(q); }); }
     if (!EP) {
-      const t = await (await fetch('assets/app.js?v=cfc639f998', { cache: 'no-cache' })).text();   // the survey page and this page always use the same script address
+      const t = await (await fetch('assets/app.js?v=390060cd9d', { cache: 'no-cache' })).text();   // the survey page and this page always use the same script address
       const m = t.match(/const ENDPOINT = '([^']+)'/); if (!m) throw new Error('endpoint');
       EP = m[1];
     }
@@ -182,7 +182,7 @@ function topWait() {
 }
 function renderGlance() {
   const n = ROWS.length;
-  const ready = byNumber(8), clear = byNumber(5), wanted = byNumber(18);
+  const ready = byNumber(8), clear = byNumber(5), wanted = byNumber(19);
   const cards = [
     ready && glanceCard('Where readiness slipped', 'Ready after Oct 8 or still not ready. “Not needed” is left out.', rankRows(ready, ['Ready after Oct 8', 'Still not ready'], ['Not needed for our project']), topWait()),
     clear && glanceCard('Least clear expectations', 'Rated 1 or 2, or “I do not recall”.', rankRows(clear, ['1', '2', 'I do not recall'], [])),
