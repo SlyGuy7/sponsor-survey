@@ -82,7 +82,7 @@ var COLUMNS = [
  },
  {
   "key": "q5_r2",
-  "label": "Q5. Giving timely feedback at sprint reviews and the midterm",
+  "label": "Q5. Giving timely feedback at sprint reviews",
   "width": 200
  },
  {
@@ -97,12 +97,12 @@ var COLUMNS = [
  },
  {
   "key": "q5_r5",
-  "label": "Q5. Telling the Project Manager early about student concerns, instead of removing a student yourself",
+  "label": "Q5. Raising concerns about a student with the Project Manager first",
   "width": 200
  },
  {
   "key": "q5_r6",
-  "label": "Q5. Attending the Industry Open House and the Final Showcase",
+  "label": "Q5. Attending the Final Showcase",
   "width": 200
  },
  {
@@ -127,7 +127,7 @@ var COLUMNS = [
  },
  {
   "key": "q8_r1",
-  "label": "Q8. Clear goals, with must-haves separated from stretch goals",
+  "label": "Q8. Clear project goals",
   "width": 200
  },
  {
@@ -182,12 +182,12 @@ var COLUMNS = [
  },
  {
   "key": "q11",
-  "label": "Q11. How soon did the team have a named day-to-day contact on your side who could answer technical questions?",
+  "label": "Q11. During the first month, about how many hours a week did this project take of your time?",
   "width": 230
  },
  {
   "key": "q12",
-  "label": "Q12. During Sprints 1 to 3, how often did you hold a regular check-in with the team?",
+  "label": "Q12. So far this semester, how often have you held a regular check-in with the team?",
   "width": 230
  },
  {
@@ -217,13 +217,13 @@ var COLUMNS = [
  },
  {
   "key": "q18",
-  "label": "Q18. Which resources would have helped you most before kickoff or during your first month?",
-  "width": 260
+  "label": "Q18. How likely are you to sponsor a Capstone project again?",
+  "width": 170
  },
  {
   "key": "q19",
-  "label": "Q19. How likely are you to sponsor a Capstone project again?",
-  "width": 170
+  "label": "Q19. Which resources would have helped you most before kickoff or during your first month?",
+  "width": 260
  },
  {
   "key": "q20",

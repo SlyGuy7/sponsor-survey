@@ -175,15 +175,15 @@ test.describe('at a glance', () => {
 
   test('ranks the biggest gaps, and leaves out answers that do not count', async ({ page }) => {
     const rows = [
-      row({ q8_r1: 'Still not ready', q8_r2: 'Ready after Oct 8', q9: 'Data or documents', q16: 2, q18: 'A named Operations contact and instructions for getting help | A pre-kickoff checklist of what to prepare (scope, data, access, contact)' }),
-      row({ q8_r1: 'Ready after Oct 8', q8_r2: 'Ready before Sprint 1 (by Sept 28)', q9: 'Data or documents', q16: 4, q18: 'A named Operations contact and instructions for getting help' }),
-      row({ q8_r1: NOT_NEEDED, q8_r2: 'Ready before Sprint 1 (by Sept 28)', q9: 'No significant delay', q16: 3, q18: 'None of these' }),
+      row({ q8_r1: 'Still not ready', q8_r2: 'Ready after Oct 8', q9: 'Data or documents', q16: 2, q19: 'A named Operations contact and instructions for getting help | A pre-kickoff checklist of what to prepare (scope, data, access, contact)' }),
+      row({ q8_r1: 'Ready after Oct 8', q8_r2: 'Ready before Sprint 1 (by Sept 28)', q9: 'Data or documents', q16: 4, q19: 'A named Operations contact and instructions for getting help' }),
+      row({ q8_r1: NOT_NEEDED, q8_r2: 'Ready before Sprint 1 (by Sept 28)', q9: 'No significant delay', q16: 3, q19: 'None of these' }),
     ];
     await mock(page, OK(rows));
     await page.goto('/dashboard.html#key=k');
     const card = page.locator('#glanceCards .q-card', { hasText: 'Where readiness slipped' });
     const first = card.locator('.bars li').first();
-    await expect(first).toContainText('Clear goals');
+    await expect(first).toContainText('Clear project goals');
     await expect(first).toContainText('2 of 2');              // the "Not needed" answer is not counted
     await expect(first).toContainText('100%');
     await expect(card.locator('.bars li').nth(1)).toContainText('1 of 3');

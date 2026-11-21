@@ -21,7 +21,7 @@
     {
       "id": "D",
       "name": "Overall experience",
-      "note": "Three questions about the project so far.",
+      "note": "Four questions about the project so far.",
       "label": "Part D"
     },
     {
@@ -198,11 +198,11 @@
       ],
       "rows": [
         "Meeting with the team about weekly (30 to 60 minutes)",
-        "Giving timely feedback at sprint reviews and the midterm",
+        "Giving timely feedback at sprint reviews",
         "Signing a scope document with the Project Manager by the end of Sprint 1",
         "Separating must-have goals from stretch goals",
-        "Telling the Project Manager early about student concerns, instead of removing a student yourself",
-        "Attending the Industry Open House and the Final Showcase",
+        "Raising concerns about a student with the Project Manager first",
+        "Attending the Final Showcase",
         "Completing the official Sponsor Evaluation by Dec 13"
       ]
     },
@@ -226,11 +226,7 @@
           "other": false
         },
         {
-          "label": "I never received it",
-          "other": false
-        },
-        {
-          "label": "I did not know it existed",
+          "label": "I never received it or did not know it existed",
           "other": false
         },
         {
@@ -255,7 +251,7 @@
           "other": false
         },
         {
-          "label": "A written guide or agreement (Sponsor Guide & FAQ, sponsor acknowledgment)",
+          "label": "A written guide or agreement (Sponsor Partnership Guide & FAQ, sponsor acknowledgment)",
           "other": false
         },
         {
@@ -272,8 +268,7 @@
         },
         {
           "label": "I figured it out as the project went",
-          "other": false,
-          "exclusive": true
+          "other": false
         },
         {
           "label": "I never received this information",
@@ -300,7 +295,7 @@
         "Not needed for our project"
       ],
       "rows": [
-        "Clear goals, with must-haves separated from stretch goals",
+        "Clear project goals",
         "A signed scope document",
         "Written requirements and acceptance criteria",
         "Data, documents, or sample material",
@@ -323,7 +318,11 @@
           "skipTo": 11
         },
         {
-          "label": "Scope or goals, or signing the scope document",
+          "label": "Unclear scope or goals",
+          "other": false
+        },
+        {
+          "label": "Getting the scope document signed",
           "other": false
         },
         {
@@ -363,7 +362,7 @@
     },
     {
       "n": 10,
-      "part": "C",
+      "part": "B",
       "text": "About how long did the team wait for that issue to be resolved?",
       "hint": "",
       "type": "single",
@@ -397,28 +396,32 @@
     {
       "n": 11,
       "part": "C",
-      "text": "How soon did the team have a named day-to-day contact on your side who could answer technical questions?",
+      "text": "During the first month, about how many hours a week did this project take of your time?",
       "hint": "",
       "type": "single",
       "options": [
         {
-          "label": "From the first team meeting",
+          "label": "Less than 1 hour",
           "other": false
         },
         {
-          "label": "During Sprint 1",
+          "label": "1 to 2 hours",
           "other": false
         },
         {
-          "label": "After Sprint 1",
+          "label": "3 to 5 hours",
           "other": false
         },
         {
-          "label": "Not yet",
+          "label": "6 to 10 hours",
           "other": false
         },
         {
-          "label": "Our project did not need one",
+          "label": "More than 10 hours",
+          "other": false
+        },
+        {
+          "label": "I am not sure",
           "other": false
         }
       ]
@@ -426,7 +429,7 @@
     {
       "n": 12,
       "part": "C",
-      "text": "During Sprints 1 to 3, how often did you hold a regular check-in with the team?",
+      "text": "So far this semester, how often have you held a regular check-in with the team?",
       "hint": "",
       "type": "single",
       "options": [
@@ -465,6 +468,10 @@
         },
         {
           "label": "Small changes, agreed with the Project Manager",
+          "other": false
+        },
+        {
+          "label": "Small changes, not agreed with the Project Manager",
           "other": false
         },
         {
@@ -543,6 +550,18 @@
     },
     {
       "n": 18,
+      "part": "D",
+      "text": "How likely are you to sponsor a Capstone project again?",
+      "hint": "",
+      "type": "scale",
+      "low": "Very unlikely",
+      "high": "Very likely",
+      "extra": [
+        "Too early to say"
+      ]
+    },
+    {
+      "n": 19,
       "part": "E",
       "text": "Which resources would have helped you most before kickoff or during your first month?",
       "hint": "Choose up to two.",
@@ -562,7 +581,7 @@
           "other": false
         },
         {
-          "label": "A one-page summary of the Sponsor Guide",
+          "label": "A one-page summary of the Sponsor Partnership Guide & FAQ",
           "other": false
         },
         {
@@ -582,18 +601,6 @@
           "other": false,
           "exclusive": true
         }
-      ]
-    },
-    {
-      "n": 19,
-      "part": "E",
-      "text": "How likely are you to sponsor a Capstone project again?",
-      "hint": "",
-      "type": "scale",
-      "low": "Very unlikely",
-      "high": "Very likely",
-      "extra": [
-        "Too early to say"
       ]
     },
     {
@@ -640,7 +647,7 @@
       "bonus": 3,
       "part": "X",
       "title": "Results",
-      "text": "Would you like a summary of the results?",
+      "text": "Would you like a summary of the results? We will send it to the email you gave.",
       "hint": "",
       "type": "single",
       "options": [

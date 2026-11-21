@@ -35,7 +35,7 @@
     const ids = new Set(hit.map(i => i.id));
     const shown = hit.filter(i => !(i.unless || []).some(u => ids.has(u)));
     const by = lvl => shown.filter(i => i.level === lvl);
-    const chosen = val(a, 'q18').split(' | ');   // question 18: up to two resources the sponsor picked
+    const chosen = val(a, 'q19').split(' | ');   // question 19: up to two resources the sponsor picked
     const kit = content.kit
       .map((k, idx) => Object.assign({}, k, { idx, picked: (k.picks || []).some(p => chosen.includes(p)) }))
       .sort((x, y) => Number(y.picked) - Number(x.picked) || x.idx - y.idx)
