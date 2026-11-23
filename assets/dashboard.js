@@ -45,7 +45,7 @@ async function load() {
   try {
     if (!SURVEY) { const r = await fetch('assets/survey.json?v=17d33fc0b7', { cache: 'no-cache' }); SURVEY = await r.json(); SURVEY.questions.forEach(q => { q.key = keyOf(q); }); }
     if (!EP) {
-      const t = await (await fetch('assets/app.js?v=390060cd9d', { cache: 'no-cache' })).text();   // the survey page and this page always use the same script address
+      const t = await (await fetch('assets/app.js?v=230b309152', { cache: 'no-cache' })).text();   // the survey page and this page always use the same script address
       const m = t.match(/const ENDPOINT = '([^']+)'/); if (!m) throw new Error('endpoint');
       EP = m[1];
     }

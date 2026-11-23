@@ -10,8 +10,9 @@ const code = fs.readFileSync(path.join(__dirname, '..', 'apps-script', 'Code.gs'
 const chain = () => new Proxy(function () {}, { get: (t, p) => (p === 'then' ? undefined : () => chain()), apply: () => chain() });
 
 // sheetId: what is saved in Script Properties (null = nothing saved). src: the script text, to test edits to it.
-function load({ existingHeader, sheetId = 'test-sheet-id', src = code } = {}) {
-  const state = { rows: existingHeader ? [existingHeader, ['old', 'row']] : [], renamed: null, created: 0, props: sheetId ? { SHEET_ID: sheetId } : {}, logged: [], openedId: null };
+// otherTabs: names of other tabs that already exist. openFails: make opening the Sheet throw, like a wrong ID.
+function load({ existingHeader, sheetId = 'test-sheet-id', src = code, otherTabs = [], openFails = false } = {}) {
+  const state = { rows: existingHeader ? [existingHeader, ['old', 'row']] : [], renamed: null, created: 0, props: sheetId ? { SHEET_ID: sheetId } : {}, logged: [], openedId: null, errors: [] };
   const makeSheet = () => ({
     getLastRow: () => state.rows.length,
     appendRow: r => state.rows.push(r),
@@ -32,14 +33,15 @@ function load({ existingHeader, sheetId = 'test-sheet-id', src = code } = {}) {
     ContentService: { MimeType: { JSON: 'json' }, createTextOutput: t => ({ t, setMimeType() { return this; } }) },
     SpreadsheetApp: {
       BandingTheme: { LIGHT_GREY: 'g' },
-      openById: id => (state.openedId = id, {
-        getSheetByName: () => sheet,
+      openById: id => { if (openFails) throw new Error('Illegal spreadsheet id or key: ' + id); state.openedId = id; return {
+        getSheetByName: name => (name === 'Responses' ? sheet : otherTabs.includes(name) ? {} : null),
         insertSheet: () => { state.created++; state.rows = []; sheet = makeSheet(); return sheet; },
-      }),
+      }; },
     },
     Utilities: { formatDate: () => '2026-10-31 0600', getUuid: () => crypto.randomUUID() },
     PropertiesService: { getScriptProperties: () => ({ getProperty: k => (k in state.props ? state.props[k] : null), setProperty: (k, v) => { state.props[k] = v; } }) },
     Logger: { log: s => state.logged.push(s) },
+    console: { error: (...a) => state.errors.push(a.join(' ')) },
     Date, JSON, String, Number, Math,
   };
   vm.createContext(ctx);
@@ -190,4 +192,17 @@ test('with no Sheet ID anywhere, a submission is refused with a clear reason and
   assert.strictEqual(out.ok, false);
   assert.match(out.error, /SHEET_ID/);
   assert.strictEqual(state.openedId, null);
+});
+
+test('an old tab never gets a name that is already taken', () => {
+  const { state, post } = load({ existingHeader: ['Something else'], otherTabs: ['Responses (old 2026-10-31 0600)'] });
+  assert.deepStrictEqual(post(base), { ok: true });
+  assert.strictEqual(state.renamed, 'Responses (old 2026-10-31 0600 2)');
+});
+
+test('a failed save is logged with the real reason, while the sponsor only sees "server error"', () => {
+  const { state, post } = load({ openFails: true });
+  assert.deepStrictEqual(post(base), { ok: false, error: 'server error' });
+  assert.strictEqual(state.errors.length, 1);
+  assert.match(state.errors[0], /saving a response.*Illegal spreadsheet id/);
 });

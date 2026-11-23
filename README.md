@@ -86,6 +86,11 @@ Both hosts switch to a new version all at once, so the site never goes down duri
 
 The 20 questions are frozen while responses are coming in: changing any wording, option or order renames the live Responses tab in the sheet. Agree a change with the team first, then update `apps-script/Code.gs` (`COLUMNS`), the tests and the readiness rules in the same change.
 
+Whenever a question, option or row is added, removed or moved, also raise two version numbers, or saved answers and kit links from before the change are read against the new questions:
+
+- `STORE` at the top of `assets/app.js` (for example `njit-sponsor-survey-v5` to `-v6`), so progress saved on sponsors' devices under the old layout is ignored instead of resumed.
+- `VERSION` in `assets/readiness.js` (for example `2_` to `3_`), and the same in the kit site's `assets/engine.js`, so old kit links show "out of date" instead of a wrong kit.
+
 Edit `assets/survey.json`. Question types: `single`, `multi`, `scale`, `grid`, `text`, `contact`. An option with `"skipTo": 12` skips questions numbered below 12. An option with `"exclusive": true` clears the other choices in a multi-select, and `"max": 2` on a multi-select limits how many answers can be chosen. Set `config.contactEmail` to show a contact link on the welcome and thank-you pages.
 
 ## Set up the response collector (first time only)
@@ -107,6 +112,8 @@ After editing `Code.gs`, update the **existing** deployment. Do not use "New dep
 4. Open the `/exec` URL. It should still say `{"ok":true,"service":"sponsor-survey"}`. The URL has not changed, so nothing on the site needs updating, and the next answer a sponsor sends goes to the new code.
 
 If something is wrong, roll back the same way: Manage deployments > pencil icon > pick the previous version > Deploy.
+
+If sponsors see "We could not confirm delivery", open Apps Script > Executions. A failed save is logged there with the real reason, for example a missing `SHEET_ID` or a lost permission.
 
 When a change touches both the script and the site, deploy the script first and make it accept both the old and the new answers, then publish the site. Sponsors who already have the old page open keep sending the old format for a while.
 

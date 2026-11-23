@@ -53,10 +53,10 @@ test.describe('completing the survey', () => {
     expect(ctl.bodies).toHaveLength(1);
     expect(kinds.filter(k => k !== 'intro')).toHaveLength(23);   // 20 questions + 3 optional
     const payload = JSON.parse(ctl.bodies[0]);
-    expect(payload).toMatchObject({ client: 'v4', hp: '', contact_email: 'a@b.co', q9: 'Unclear scope or goals', results_ok: 'No' });   // email given, so the results question was asked
+    expect(payload).toMatchObject({ client: 'v5', hp: '', contact_email: 'a@b.co', q9: 'Unclear scope or goals', results_ok: 'No' });   // email given, so the results question was asked
     expect(payload.q10).toBeTruthy();
     expect(payload.elapsedMs).toBeGreaterThan(0);
-    expect(await page.evaluate(() => localStorage.getItem('njit-sponsor-survey-v4'))).toBeNull();
+    expect(await page.evaluate(() => localStorage.getItem('njit-sponsor-survey-v5'))).toBeNull();
   });
 
   test('skip logic: "No significant delay" removes question 10 (the wait time)', async ({ page }) => {
@@ -95,7 +95,7 @@ test.describe('completing the survey', () => {
       await expect(page.locator('#retryRow')).toBeVisible();
       await expect(page.locator('#steps')).toBeHidden();
       await expect(page.locator('#closeTab')).toBeHidden();
-      expect(await page.evaluate(() => localStorage.getItem('njit-sponsor-survey-v4'))).not.toBeNull();
+      expect(await page.evaluate(() => localStorage.getItem('njit-sponsor-survey-v5'))).not.toBeNull();
       ctl.mode = 'ok';
       await page.click('#retry');
       await expect(page.locator('#doneH')).toContainText('Thank');
@@ -109,7 +109,7 @@ test.describe('completing the survey', () => {
     await startSurvey(page);
     await answerAll(page, { email: 'private@example.com' });
     await expect(page.locator('#doneH')).toHaveText('We could not confirm delivery');
-    const stored = await page.evaluate(() => localStorage.getItem('njit-sponsor-survey-v4'));
+    const stored = await page.evaluate(() => localStorage.getItem('njit-sponsor-survey-v5'));
     expect(stored).not.toContain('private@example.com');
     expect(stored).not.toMatch(/"contact(_[a-z]+)?"\s*:/);   // no contact fields stored
   });
@@ -168,6 +168,14 @@ test.describe('validation', () => {
 });
 
 test.describe('keyboard, history and resume', () => {
+  test('progress saved before the question changes (old storage key) is ignored, not resumed', async ({ page }) => {
+    await page.addInitScript(() => localStorage.setItem('njit-sponsor-survey-v4', JSON.stringify({ ans: { q18: { v: ['None of these'] } }, pos: 17, hist: [], sid: 's-old', started: Date.now(), t: Date.now() })));
+    await page.goto('/index.html');
+    await page.waitForFunction(() => !document.querySelector('#start').disabled);
+    await expect(page.locator('#resume')).toBeHidden();
+    await expect(page.locator('#start')).toBeVisible();
+  });
+
   test('Space selects without advancing, arrows move, Enter continues, ArrowLeft does not navigate', async ({ page }) => {
     await startSurvey(page, { quick: true });
     await page.locator('#ctl input').first().focus();
