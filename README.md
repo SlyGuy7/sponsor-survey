@@ -119,6 +119,24 @@ When a change touches both the script and the site, deploy the script first and 
 
 The script ignores unknown fields, caps text length, prefixes values that start with `=`, `+`, `-` or `@` so a sheet never runs them as formulas, rejects honeypot and impossibly fast submissions, de-duplicates retries by `submissionId`, and serializes writes with a lock.
 
+## The response Sheet
+
+The script keeps four tabs in the Google Sheet:
+
+| Tab | What it shows |
+| --- | --- |
+| **Responses** | One row per response. Header cells are coloured by survey part, and answers that need attention are highlighted: red for problems (for example "Still not ready", ratings of 1 or 2, a scope change that was not agreed), amber for warnings, green for good news. The ID and time received stay in view while you scroll. |
+| **Summary** | At-a-glance numbers, then every choice question with how many sponsors picked each answer, the share and a bar. |
+| **Grids** | The Q5 and Q8 grids as tables with a heat map, plus the average rating for Q5. |
+| **Comments** | Written answers (Q17 and Q20) and follow-up contacts, newest first, with who may be quoted and who wants the results. |
+
+All of it updates by itself as answers arrive. To set it up, or after changing the questions:
+
+1. Run `npm run sync:script` (copies the questions into `Code.gs`; `npm test` fails if you forget), then paste the new `Code.gs` and deploy as above.
+2. In the Apps Script editor, run **setupSheet** (formats the Responses tab), then **buildReportTabs** (rebuilds Summary, Grids and Comments).
+
+The report tabs find the Responses tab by name and each column by its header, so they keep working when the script sets an old Responses tab aside. Edit the colours or the highlighted answers in `HIGHLIGHTS` and `PART_COLORS` near the top of `setupSheet_` in `Code.gs`.
+
 ## Automated tests
 
 Every push runs the checks in `.github/workflows/test.yml` (the Actions tab on GitHub; a green tick means they passed). GitHub Pages publishes `main` whether or not they pass, so look at the tick before you share a new version.

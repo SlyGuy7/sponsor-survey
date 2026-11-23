@@ -11,21 +11,25 @@ const chain = () => new Proxy(function () {}, { get: (t, p) => (p === 'then' ? u
 
 // sheetId: what is saved in Script Properties (null = nothing saved). src: the script text, to test edits to it.
 // otherTabs: names of other tabs that already exist. openFails: make opening the Sheet throw, like a wrong ID.
-function load({ existingHeader, sheetId = 'test-sheet-id', src = code, otherTabs = [], openFails = false } = {}) {
-  const state = { rows: existingHeader ? [existingHeader, ['old', 'row']] : [], renamed: null, created: 0, props: sheetId ? { SHEET_ID: sheetId } : {}, logged: [], openedId: null, errors: [] };
+// spreadsheet: replace the whole fake spreadsheet (for buildReportTabs).
+function load({ existingHeader, sheetId = 'test-sheet-id', src = code, otherTabs = [], openFails = false, spreadsheet = null } = {}) {
+  const state = { rows: existingHeader ? [existingHeader, ['old', 'row']] : [], renamed: null, created: 0, props: sheetId ? { SHEET_ID: sheetId } : {}, logged: [], openedId: null, errors: [], headerBg: {}, rules: null, cellFormats: {} };
   const makeSheet = () => ({
     getLastRow: () => state.rows.length,
     appendRow: r => state.rows.push(r),
     getRange: (r, c, n, m) => ({
+      setBackground: v => { if (r === 1 && n === undefined) state.headerBg[c] = v; return chain(); },
+      setNumberFormat: v => { if (n === undefined) state.cellFormats[r + ':' + c] = v; return chain(); },
       getValues: () => (r === 1 ? [state.rows[0] || []] : state.rows.slice(r - 1, r - 1 + n).map(x => x.slice(c - 1, c - 1 + (m || 1)))),
       setValues: v => { if (!state.rows.length) state.rows.push(v[0]); else state.rows[0] = v[0]; },
-      setBackground: chain, setFontColor: chain, setFontWeight: chain, setFontSize: chain, setWrap: chain,
-      setVerticalAlignment: chain, setHorizontalAlignment: chain, setFontFamily: chain, setNumberFormat: chain,
+      setFontColor: chain, setFontWeight: chain, setFontSize: chain, setWrap: chain,
+      setVerticalAlignment: chain, setHorizontalAlignment: chain, setFontFamily: chain,
       createFilter: chain, applyRowBanding: chain,
     }),
     setFrozenRows() {}, setFrozenColumns() {}, setRowHeight() {}, setColumnWidth() {},
     getMaxColumns: () => 100, getMaxRows: () => 1000, insertColumnsAfter() {}, insertRowsAfter() {},
     getBandings: () => [], getFilter: () => null, setName: n => { state.renamed = n; },
+    setConditionalFormatRules: r => { state.rules = r; },
   });
   let sheet = existingHeader ? makeSheet() : null;
   const ctx = {
@@ -33,7 +37,8 @@ function load({ existingHeader, sheetId = 'test-sheet-id', src = code, otherTabs
     ContentService: { MimeType: { JSON: 'json' }, createTextOutput: t => ({ t, setMimeType() { return this; } }) },
     SpreadsheetApp: {
       BandingTheme: { LIGHT_GREY: 'g' },
-      openById: id => { if (openFails) throw new Error('Illegal spreadsheet id or key: ' + id); state.openedId = id; return {
+      newConditionalFormatRule: () => chain(),
+      openById: id => { if (spreadsheet) return spreadsheet; if (openFails) throw new Error('Illegal spreadsheet id or key: ' + id); state.openedId = id; return {
         getSheetByName: name => (name === 'Responses' ? sheet : otherTabs.includes(name) ? {} : null),
         insertSheet: () => { state.created++; state.rows = []; sheet = makeSheet(); return sheet; },
       }; },
@@ -205,4 +210,117 @@ test('a failed save is logged with the real reason, while the sponsor only sees 
   assert.deepStrictEqual(post(base), { ok: false, error: 'server error' });
   assert.strictEqual(state.errors.length, 1);
   assert.match(state.errors[0], /saving a response.*Illegal spreadsheet id/);
+});
+
+// ---- readable Responses tab and the Summary, Grids and Comments tabs ----
+
+test('the survey copy inside the script matches survey.json (run "npm run sync:script" after changing questions)', () => {
+  const run = require('child_process').spawnSync(process.execPath, [path.join(__dirname, '..', 'scripts', 'sync-script.js'), '--check'], { encoding: 'utf8' });
+  assert.strictEqual(run.status, 0, run.stderr);
+});
+
+test('a new Responses tab gets part-coloured headers and answer highlights', () => {
+  const { ctx, state, post } = load();
+  post(base);
+  const keys = ctx.COLUMNS.map(c => c.key);
+  const bg = k => state.headerBg[keys.indexOf(k) + 1];
+  assert.strictEqual(bg('submissionId'), ctx.PART_COLORS.meta);
+  assert.strictEqual(bg('q1'), ctx.PART_COLORS.A);
+  assert.strictEqual(bg('q8_r3'), ctx.PART_COLORS.B);
+  assert.strictEqual(bg('q10'), ctx.PART_COLORS.B);
+  assert.strictEqual(bg('q11'), ctx.PART_COLORS.C);
+  assert.strictEqual(bg('q18'), ctx.PART_COLORS.D);
+  assert.strictEqual(bg('q19'), ctx.PART_COLORS.E);
+  assert.strictEqual(bg('contact_email'), ctx.PART_COLORS.X);
+  assert.ok(Array.isArray(state.rules) && state.rules.length > 50, 'highlight rules were applied');
+});
+
+test('every highlighted answer is a real answer in the survey', () => {
+  const { ctx } = load();
+  const answers = {};
+  ctx.SURVEY.questions.forEach(q => {
+    const all = (q.options || []).concat(q.extra || [], q.cols || []);
+    if (q.type === 'grid') q.rows.forEach((_, i) => { answers[q.key + '_r' + (i + 1)] = all; });
+    else answers[q.key] = all;
+  });
+  ctx.HIGHLIGHTS.forEach(h => {
+    const cols = Object.keys(answers).filter(k => h.keys.test(k));
+    assert.ok(cols.length, 'pattern matches no column: ' + h.keys);
+    ['bad', 'warn', 'good', 'muted'].forEach(kind => (h[kind] || []).forEach(v => {
+      cols.forEach(k => assert.ok(answers[k].includes(v), `${k} has no answer "${v}"`));
+    }));
+  });
+});
+
+// Every formula in a plan may only look up headers that exist, and every looked-up column is a real one.
+function headersUsed(plan) {
+  const used = [];
+  plan.rows.flat().filter(c => typeof c === 'string' && c.startsWith('=')).forEach(f => {
+    for (const m of f.matchAll(/MATCH\("((?:[^"]|"")*)"/g)) used.push(m[1].replace(/""/g, '"'));
+  });
+  return used;
+}
+
+test('the Summary tab counts every choice question, by header, through INDIRECT', () => {
+  const { ctx } = load();
+  const plan = ctx.summaryPlan_();
+  const text = plan.rows.flat().join('\n');
+  ctx.SURVEY.questions.filter(q => q.n && ['single', 'multi', 'scale'].includes(q.type)).forEach(q => {
+    assert.ok(text.includes('Q' + q.n + '. ' + q.text), 'missing Q' + q.n);
+    (q.options || []).forEach(o => assert.ok(text.includes(o), `Q${q.n} missing answer "${o}"`));
+  });
+  const used = headersUsed(plan);
+  assert.ok(used.length > 50);
+  used.forEach(h => assert.ok(ctx.HEADERS.includes(h), 'no such header: ' + h));
+  // formulas never point at a tab directly (a rename would drag them along); they go through INDIRECT
+  plan.rows.flat().filter(c => typeof c === 'string' && c.startsWith('=')).forEach(f => assert.ok(!/'Responses[^']*'!/.test(f.replace(/INDIRECT\("[^"]*"\)/g, '')), f));
+  // multi-select answers are split on " | " before counting
+  assert.ok(text.includes('SPLIT(FILTER('), 'multi-select counts split the joined answers');
+});
+
+test('the Grids tab has one table per grid question, with a heat map', () => {
+  const { ctx } = load();
+  const plan = ctx.gridsPlan_();
+  const grids = ctx.SURVEY.questions.filter(q => q.type === 'grid');
+  assert.strictEqual(plan.heat.length, grids.length);
+  grids.forEach((q, i) => {
+    assert.strictEqual(plan.heat[i].rows, q.rows.length);
+    assert.strictEqual(plan.heat[i].cols, q.cols.length);
+    q.rows.forEach(r => assert.ok(plan.rows.some(row => row[0] === r), 'missing row ' + r));
+  });
+  headersUsed(plan).forEach(h => assert.ok(ctx.HEADERS.includes(h), 'no such header: ' + h));
+});
+
+test('the Comments tab lists written answers and contacts, newest first', () => {
+  const { ctx } = load();
+  const plan = ctx.commentsPlan_();
+  const f = plan.rows[4][0];
+  assert.match(f, /^=IFERROR\(SORT\(FILTER\(\{/);
+  assert.match(f, /,1,FALSE\)/);
+  const used = headersUsed(plan);
+  ['receivedAt', 'q17', 'q20', 'contact_email', 'quote_ok', 'results_ok'].forEach(k => assert.ok(used.includes(ctx.HEADERS[ctx.COLUMNS.findIndex(c => c.key === k)]), k));
+});
+
+test('buildReportTabs replaces Summary, Grids and Comments and places them after Responses', () => {
+  const deleted = [], inserted = [];
+  const fakeSheet = () => new Proxy({}, { get: (t, p) => (p === 'then' ? undefined : p === 'getIndex' ? () => 1 : p === 'getMaxRows' ? () => 1000 : p === 'getMaxColumns' ? () => 26 : p === 'getLastRow' ? () => 1 : p === 'getRange' ? () => chainy() : () => fakeSheet()) });
+  const chainy = () => new Proxy({}, { get: (t, p) => (p === 'then' ? undefined : p === 'getValues' ? () => [HEADERS_FROM_CTX] : () => chainy()) });
+  let HEADERS_FROM_CTX = [];
+  const spreadsheet = {
+    getSheetByName: name => fakeSheet(),
+    deleteSheet: s => deleted.push(s),
+    insertSheet: (name, index) => { inserted.push([name, index]); return fakeSheet(); },
+  };
+  const { ctx } = load({ spreadsheet });
+  HEADERS_FROM_CTX = ctx.HEADERS;
+  ctx.buildReportTabs();
+  assert.deepStrictEqual(inserted, [['Summary', 1], ['Grids', 2], ['Comments', 3]]);
+  assert.strictEqual(deleted.length, 3);
+});
+
+test('each saved row shows the time received in the readable format', () => {
+  const { ctx, state, post } = load();
+  post(base);
+  const col = ctx.COLUMNS.findIndex(c => c.key === 'receivedAt') + 1;
+  assert.strictEqual(state.cellFormats[state.rows.length + ':' + col], ctx.DATE_FORMAT);
 });
