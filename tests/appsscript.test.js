@@ -13,16 +13,17 @@ const chain = () => new Proxy(function () {}, { get: (t, p) => (p === 'then' ? u
 // otherTabs: names of other tabs that already exist. openFails: make opening the Sheet throw, like a wrong ID.
 // spreadsheet: replace the whole fake spreadsheet (for buildReportTabs).
 function load({ existingHeader, sheetId = 'test-sheet-id', src = code, otherTabs = [], openFails = false, spreadsheet = null } = {}) {
-  const state = { rows: existingHeader ? [existingHeader, ['old', 'row']] : [], renamed: null, created: 0, props: sheetId ? { SHEET_ID: sheetId } : {}, logged: [], openedId: null, errors: [], headerBg: {}, rules: null };
+  const state = { rows: existingHeader ? [existingHeader, ['old', 'row']] : [], renamed: null, created: 0, props: sheetId ? { SHEET_ID: sheetId } : {}, logged: [], openedId: null, errors: [], headerBg: {}, rules: null, cellFormats: {} };
   const makeSheet = () => ({
     getLastRow: () => state.rows.length,
     appendRow: r => state.rows.push(r),
     getRange: (r, c, n, m) => ({
       setBackground: v => { if (r === 1 && n === undefined) state.headerBg[c] = v; return chain(); },
+      setNumberFormat: v => { if (n === undefined) state.cellFormats[r + ':' + c] = v; return chain(); },
       getValues: () => (r === 1 ? [state.rows[0] || []] : state.rows.slice(r - 1, r - 1 + n).map(x => x.slice(c - 1, c - 1 + (m || 1)))),
       setValues: v => { if (!state.rows.length) state.rows.push(v[0]); else state.rows[0] = v[0]; },
       setFontColor: chain, setFontWeight: chain, setFontSize: chain, setWrap: chain,
-      setVerticalAlignment: chain, setHorizontalAlignment: chain, setFontFamily: chain, setNumberFormat: chain,
+      setVerticalAlignment: chain, setHorizontalAlignment: chain, setFontFamily: chain,
       createFilter: chain, applyRowBanding: chain,
     }),
     setFrozenRows() {}, setFrozenColumns() {}, setRowHeight() {}, setColumnWidth() {},
@@ -315,4 +316,11 @@ test('buildReportTabs replaces Summary, Grids and Comments and places them after
   ctx.buildReportTabs();
   assert.deepStrictEqual(inserted, [['Summary', 1], ['Grids', 2], ['Comments', 3]]);
   assert.strictEqual(deleted.length, 3);
+});
+
+test('each saved row shows the time received in the readable format', () => {
+  const { ctx, state, post } = load();
+  post(base);
+  const col = ctx.COLUMNS.findIndex(c => c.key === 'receivedAt') + 1;
+  assert.strictEqual(state.cellFormats[state.rows.length + ':' + col], ctx.DATE_FORMAT);
 });

@@ -658,6 +658,9 @@ function clean_(v) {
   return s;
 }
 
+// How the time received is shown, for example "Nov 23, 2026  3:04 PM".
+var DATE_FORMAT = 'mmm d, yyyy  h:mm am/pm';
+
 // ---- Making the Responses tab easy to read ----------------------------------------------------
 // Header cells take their survey part's colour, so the eye can find "Part B" at a glance.
 var PART_COLORS = { meta: '#3A3766', A: '#1C1475', B: '#2A2090', C: '#14105A', D: '#33299E', E: '#9E0000', X: '#55527A' };
@@ -733,7 +736,7 @@ function setupSheet_(sheet) {
   COLUMNS.forEach(function (c, i) { sheet.getRange(1, i + 1).setBackground(PART_COLORS[partOfKey_(c.key)] || PART_COLORS.meta); });
 
   var keys = COLUMNS.map(function (c) { return c.key; });
-  sheet.getRange(2, keys.indexOf('receivedAt') + 1, rows - 1, 1).setNumberFormat('mmm d, yyyy  h:mm am/pm');
+  sheet.getRange(2, keys.indexOf('receivedAt') + 1, rows - 1, 1).setNumberFormat(DATE_FORMAT);
   sheet.getRange(2, keys.indexOf('submissionId') + 1, rows - 1, 1).setFontColor('#8C89B0').setFontSize(8);
   // 1-5 ratings and counts read best centred
   COLUMNS.forEach(function (c, i) {
@@ -796,7 +799,7 @@ function summaryPlan_() {
   add(['At a glance', '', '', ''], 'section');
   add(['Responses received', '=COUNTA(' + col_('submissionId') + ')']);
   var latest = add(['Latest response', '=IF(COUNTA(' + col_('submissionId') + ')=0,"None yet",MAX(' + col_('receivedAt') + '))']);
-  p.formats.push({ row: latest, col: 2, rows: 1, fmt: 'mmm d, yyyy  h:mm am/pm' });
+  p.formats.push({ row: latest, col: 2, rows: 1, fmt: DATE_FORMAT });
   add(['Average satisfaction with how the project started (Q16)', '=IFERROR(TEXT(AVERAGE(' + col_('q16') + '),"0.0")&" / 5","No answers yet")']);
   add(['Median time to finish', '=IFERROR(TEXT(MEDIAN(' + col_('seconds') + ')/60,"0.0")&" min","No answers yet")']);
   add(['Want a summary of the results', '=COUNTIF(' + col_('results_ok') + ',"Yes")']);
@@ -968,6 +971,9 @@ function doPost(e) {
     d.receivedAt = new Date();
     d.seconds = Math.round((Number(d.elapsedMs) || 0) / 1000);
     sheet.appendRow(COLUMNS.map(function (c) { return c.key === 'receivedAt' ? d.receivedAt : clean_(d[c.key]); }));
+    // Writing a date resets the cell to Google's default format, so give the new row the readable one again.
+    var receivedCol = COLUMNS.map(function (c) { return c.key; }).indexOf('receivedAt') + 1;
+    try { sheet.getRange(sheet.getLastRow(), receivedCol).setNumberFormat(DATE_FORMAT); } catch (fmtErr) { /* the answer is saved; only the look is affected */ }
     return json_({ ok: true });
   } catch (err) {
     logError_('saving a response', err);
