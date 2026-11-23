@@ -123,7 +123,7 @@ test('contact details can never reach the package', () => {
 test('a kit link carries only option codes, and decoding gives back the same kit', () => {
   const a = { ...GOOD, q4: '2 to 3', q5_r3: 'I do not recall', q8_r2: 'Still not ready', q9: 'Not sure', q14: 'I didn’t need help', q16: '2', q18: 'Too early to say', q19: 'A pre-kickoff checklist of what to prepare (scope, data, access, contact)', contact_name: 'Pat Example', contact_email: 'pat@acme.test', q20: 'free text here' };
   const code = R.encode(S.questions, a);
-  assert.match(code, /^1_[0-9a-zx._-]+$/);
+  assert.match(code, /^2_[0-9a-zx._-]+$/);
   for (const s of ['Pat', 'acme', 'free text', 'Still']) assert.ok(!code.includes(s), s);
   const back = R.decode(S.questions, code);
   for (const k of ['q4', 'q5_r3', 'q8_r2', 'q9', 'q14', 'q16', 'q18', 'q19']) assert.equal(back[k], String(a[k]), k);
@@ -133,7 +133,7 @@ test('a kit link carries only option codes, and decoding gives back the same kit
 });
 
 test('a damaged kit link never throws and never invents answers', () => {
-  for (const bad of ['', 'garbage', '2_4-1', '1_', '1_99-1', '1_4-99', '1_4-', '1_5-zzzz', '1_14-x9', '1_16-7', '1_18-99.-1', null, undefined]) {
+  for (const bad of ['', 'garbage', '3_4-1', '1_4-1', '2_', '2_99-1', '2_4-99', '2_4-', '2_5-zzzz', '2_14-x9', '2_16-7', '2_19-99.-1', null, undefined]) {
     assert.doesNotThrow(() => R.decode(S.questions, bad), String(bad));
     assert.deepEqual(R.decode(S.questions, bad), {}, String(bad));
   }
@@ -149,4 +149,9 @@ test('how likely a sponsor is to sponsor again changes the kit, and never mentio
 test('only Dr. Eljabiri\'s email is listed as a contact', () => {
   const emails = C.contacts.map(c => c.email).filter(Boolean);
   assert.deepEqual(emails, ['osama.eljabiri@njit.edu']);
+});
+
+test('links made before the question changes (version 1_) are refused, not read against the new questions', () => {
+  assert.equal(R.VERSION, '2_');
+  assert.deepEqual(R.decode(S.questions, '1_1-3_4-0_5---1----_8--3----2-_14-x1_16-4_18-1.5_19-x0'), {});
 });

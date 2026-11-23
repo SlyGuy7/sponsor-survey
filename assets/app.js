@@ -3,11 +3,13 @@
 
 /* ---------- configuration ---------- */
 const ENDPOINT = 'https://script.google.com/macros/s/AKfycbxwJBFhmA1rF7pGtUPVpPwqblEnttvOuaUfCXjdgJDlWTFpAHdhyiPJbE6tPYRPMS2_2A/exec';
-const STORE = 'njit-sponsor-survey-v4';
+// Bump the version whenever questions or options change, so progress saved under the old layout is not
+// matched to renumbered questions (it is simply ignored, and the sponsor starts fresh).
+const STORE = 'njit-sponsor-survey-v5';
 const PREF = 'njit-sponsor-survey-prefs';
 const TTL = 24 * 60 * 60 * 1000;          // saved progress expires after 24 hours
 const KIT_URL = 'https://slyguy7.github.io/sponsor-kit/';   // the separate kit site; it rebuilds the kit from the codes after the #
-const SEND_TIMEOUT = 20000;
+const SEND_TIMEOUT = 45000;               // longer than the script's 15-second lock wait plus an Apps Script cold start
 const AUTO_MS = 480;
 const TOAST_MS = 2800;
 
@@ -321,7 +323,7 @@ addEventListener('popstate', () => {
 
 /* ---------- submit ---------- */
 function payload() {
-  const o = { submissionId: sid, submittedAt: new Date().toISOString(), elapsedMs: Date.now() - started, hp: $('#hp').value, client: 'v4' };
+  const o = { submissionId: sid, submittedAt: new Date().toISOString(), elapsedMs: Date.now() - started, hp: $('#hp').value, client: 'v5' };
   QS.forEach(q => {
     const a = ans[q.key];
     if (skipped(q) || a === undefined || a === null) return;
@@ -405,7 +407,7 @@ function onSuccess() {
 }
 function onFailure() {
   $('#doneH').textContent = 'We could not confirm delivery';
-  $('#doneP').textContent = canStore ? 'Nothing has been lost. Your answers are saved on this device.' : 'Use “Copy my answers” before you leave this page, because this browser cannot save them.';
+  $('#doneP').textContent = canStore ? 'Your answers are saved on this device. Contact details are never saved, so keep this tab open and try again to include them.' : 'Use “Copy my answers” before you leave this page, because this browser cannot save them.';
   setStatus('bad', 'We could not confirm that your answers arrived.'); document.title = 'Delivery not confirmed – Sponsor Experience Survey';
   $('#retryRow').hidden = false; $('#failHelp').hidden = false;
 }

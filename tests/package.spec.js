@@ -98,7 +98,7 @@ test('the thank-you screen offers a button that opens the kit site with a code-o
   await expect(btn).toBeVisible();
   await expect(btn).toHaveText('Open my readiness kit');
   await expect(btn).not.toHaveAttribute('target', /./);
-  await expect(btn).toHaveAttribute('href', /^https:\/\/slyguy7\.github\.io\/sponsor-kit\/#kit=1_[0-9a-zx._-]+$/);
+  await expect(btn).toHaveAttribute('href', /^https:\/\/slyguy7\.github\.io\/sponsor-kit\/#kit=2_[0-9a-zx._-]+$/);
   const href = await btn.getAttribute('href');
   expect(href).not.toMatch(/a@b\.co/);
   await btn.click();

@@ -269,6 +269,12 @@ var COLUMNS = [
 
 var HEADERS = COLUMNS.map(function (c) { return c.label; });
 
+// Writes the real error to Apps Script's Executions page (Error level), so a failed save can be diagnosed there.
+// Sponsors still only see "server error".
+function logError_(what, err) {
+  console.error('Failed while ' + what + ': ' + ((err && (err.stack || err.message)) || err));
+}
+
 function json_(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
 }
@@ -317,7 +323,10 @@ function getSheet_() {
   if (sheet && sheet.getLastRow() > 0) {
     var have = sheet.getRange(1, 1, 1, HEADERS.length).getValues()[0].join('|');
     if (have !== HEADERS.join('|')) {
-      sheet.setName(SHEET_NAME + ' (old ' + Utilities.formatDate(new Date(), 'UTC', 'yyyy-MM-dd HHmm') + ')');
+      // A name with seconds, plus a counter if even that is taken, so two layout changes close together never collide.
+      var base = SHEET_NAME + ' (old ' + Utilities.formatDate(new Date(), 'UTC', 'yyyy-MM-dd HHmmss'), name = base + ')';
+      for (var n = 2; ss.getSheetByName(name) && n < 100; n++) name = base + ' ' + n + ')';
+      sheet.setName(name);
       sheet = null;
     }
   }
@@ -361,7 +370,7 @@ function doGet(e) {
   if (p.action === 'summary') {
     var key = PropertiesService.getScriptProperties().getProperty('DASHBOARD_KEY');
     if (!key || !p.key || String(p.key) !== key) return json_({ ok: false, error: 'not allowed' });
-    try { return json_(summary_()); } catch (err) { return json_({ ok: false, error: 'server error' }); }
+    try { return json_(summary_()); } catch (err) { logError_('dashboard summary', err); return json_({ ok: false, error: 'server error' }); }
   }
   return json_({ ok: true, service: 'sponsor-survey' });
 }
@@ -391,6 +400,7 @@ function doPost(e) {
     sheet.appendRow(COLUMNS.map(function (c) { return c.key === 'receivedAt' ? d.receivedAt : clean_(d[c.key]); }));
     return json_({ ok: true });
   } catch (err) {
+    logError_('saving a response', err);
     return json_({ ok: false, error: 'server error' });
   } finally {
     try { lock.releaseLock(); } catch (x) {}
